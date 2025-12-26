@@ -1,0 +1,1 @@
+enum PopupStyle { base, error }

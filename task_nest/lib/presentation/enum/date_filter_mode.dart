@@ -1,0 +1,1 @@
+enum DateFilterMode { main, dateFilter }

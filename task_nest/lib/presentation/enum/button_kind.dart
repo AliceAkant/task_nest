@@ -1,0 +1,1 @@
+enum ButtonKind { base, error }
