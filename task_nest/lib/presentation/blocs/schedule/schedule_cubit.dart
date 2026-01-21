@@ -217,20 +217,37 @@ class ScheduleCubit extends Cubit<ScheduleState> {
       );
       loadByDate(date);
     } else {
-      final filtered = _applyMemberFilter(
-        state.rawEvents,
-        memberFilterMode,
-        member,
-      );
       emit(
         state.copyWith(
           memberFilterMode: memberFilterMode,
           selectedMember: memberFilterMode == MemberFilterMode.member
               ? member
               : null,
-          filteredEvents: filtered,
         ),
       );
+
+      final needResetDate =
+          state.dateFilterMode == DateFilterMode.dateFilter &&
+          state.selectedDate != null;
+
+      if (needResetDate) {
+        loadMainSchedule();
+      } else {
+        final filtered = _applyMemberFilter(
+          state.rawEvents,
+          memberFilterMode,
+          member,
+        );
+        emit(
+          state.copyWith(
+            memberFilterMode: memberFilterMode,
+            selectedMember: memberFilterMode == MemberFilterMode.member
+                ? member
+                : null,
+            filteredEvents: filtered,
+          ),
+        );
+      }
     }
   }
 

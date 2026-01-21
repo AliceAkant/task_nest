@@ -13,6 +13,9 @@ import 'package:task_nest/presentation/widgets/views/calendar_view.dart';
 class DatePicker extends StatefulWidget {
   final DateTime? initialDate;
   final DateTime? startDate;
+
+  /// If not null - will be shown events count badge near date
+  final Map<DateTime, int>? eventsCountMap;
   final String? errorText;
   final bool isValid;
   final bool showResetButton;
@@ -23,6 +26,7 @@ class DatePicker extends StatefulWidget {
     super.key,
     this.initialDate,
     this.startDate,
+    this.eventsCountMap,
     this.errorText,
     this.isValid = true,
     this.showResetButton = true,
@@ -62,6 +66,7 @@ class _DatePickerState extends State<DatePicker> {
             initialDate: _selectedDate,
             firstDate: widget.startDate ?? DateTime.now().dateOnly,
             lastDate: DateTime(2100),
+            dayEventCountMap: widget.eventsCountMap,
             resetAvailable: widget.showResetButton,
             onSubmit: (date) => Navigator.pop(ctx, date),
             onCancel: () => Navigator.pop(ctx, null),

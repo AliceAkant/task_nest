@@ -10,6 +10,10 @@ abstract class EventsRepository {
     DateTime end,
   );
   Future<Either<Failure, List<Event>>> getEventsByMemberId(int? memberId);
+  Future<Either<Failure, Map<DateTime, int>>> getEventsCount(
+    DateTime start,
+    int monthsCount,
+  );
   Future<Either<Failure, Event>> addEvent(Event event);
   Future<Either<Failure, Event>> updateEvent(Event event);
   Future<Either<Failure, bool>> deleteEvent(int eventId);

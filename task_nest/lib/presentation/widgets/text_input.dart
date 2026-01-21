@@ -56,6 +56,7 @@ class _TextInputState extends State<TextInput> {
   @override
   void dispose() {
     _focusNode.dispose();
+    widget.controller.dispose();
     super.dispose();
   }
 

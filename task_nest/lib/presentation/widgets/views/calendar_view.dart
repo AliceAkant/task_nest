@@ -14,6 +14,7 @@ class CalendarView extends StatefulWidget {
   final DateTime? initialDate;
   late final DateTime firstDate;
   late final DateTime lastDate;
+  final Map<DateTime, int>? dayEventCountMap;
   final bool resetAvailable;
   final SubmitCallback? onSubmit;
   final VoidCallback? onCancel;
@@ -25,6 +26,7 @@ class CalendarView extends StatefulWidget {
     this.initialDate,
     DateTime? firstDate,
     DateTime? lastDate,
+    this.dayEventCountMap,
     this.resetAvailable = true,
     this.onSubmit,
     this.onCancel,
@@ -128,6 +130,7 @@ class _CalendarViewState extends State<CalendarView> {
             selectedDate: _selectedDate,
             firstDate: widget.firstDate,
             lastDate: widget.lastDate,
+            dayEventCountMap: widget.dayEventCountMap,
             onDateTap: (date) {
               setState(() => _selectedDate = date);
               widget.onDateChanged?.call(date);
@@ -211,6 +214,7 @@ class _DaysGrid extends StatelessWidget {
   final DateTime? selectedDate;
   final DateTime firstDate;
   final DateTime lastDate;
+  final Map<DateTime, int>? dayEventCountMap;
   final ValueChanged<DateTime> onDateTap;
 
   const _DaysGrid({
@@ -220,6 +224,7 @@ class _DaysGrid extends StatelessWidget {
     required this.selectedDate,
     required this.firstDate,
     required this.lastDate,
+    required this.dayEventCountMap,
     required this.onDateTap,
   });
 
@@ -253,6 +258,7 @@ class _DaysGrid extends StatelessWidget {
             now.day == date.day;
 
         final isDisabled = date.isBefore(firstDate) || date.isAfter(lastDate);
+        final eventsCount = dayEventCountMap?[date];
 
         return GestureDetector(
           onTap: () {
@@ -261,6 +267,7 @@ class _DaysGrid extends StatelessWidget {
           child: DayItem(
             key: ValueKey(date),
             date: date,
+            eventsCount: eventsCount,
             isSelected: isSelected,
             isToday: isToday,
             isDisabled: isDisabled,
@@ -314,6 +321,7 @@ class _CalendarFooter extends StatelessWidget {
 
 class DayItem extends StatelessWidget {
   final DateTime date;
+  final int? eventsCount;
   final bool isSelected;
   final bool isToday;
   final bool isDisabled;
@@ -321,6 +329,7 @@ class DayItem extends StatelessWidget {
   const DayItem({
     super.key,
     required this.date,
+    required this.eventsCount,
     required this.isSelected,
     required this.isToday,
     required this.isDisabled,
@@ -328,25 +337,52 @@ class DayItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isSelected ? context.colors.purple : null,
-        border: isToday
-            ? Border.all(color: context.colors.purple, width: AppSizes.border2)
-            : null,
-      ),
-      child: BaseText(
-        '${date.day}',
-        localized: false,
-        fontSize: TypographyConst.labelMedium,
-        color: isDisabled
-            ? context.colors.buttonDisabled
-            : isSelected
-            ? Colors.white
-            : context.colors.labelPrimary,
-      ),
+    return Stack(
+      alignment: Alignment.topRight,
+      children: [
+        Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isSelected ? context.colors.purple : null,
+            border: isToday
+                ? Border.all(
+                    color: context.colors.purple,
+                    width: AppSizes.border2,
+                  )
+                : null,
+          ),
+          child: BaseText(
+            '${date.day}',
+            localized: false,
+            fontSize: TypographyConst.labelMedium,
+            color: isDisabled
+                ? context.colors.buttonDisabled
+                : isSelected
+                ? Colors.white
+                : context.colors.labelPrimary,
+          ),
+        ),
+        // EVENTS COUNT BADGE
+        if (eventsCount != null && eventsCount! > 0)
+          Container(
+            alignment: Alignment.center,
+            height: AppSizes.size16,
+            width: AppSizes.size16,
+            decoration: BoxDecoration(
+              color: context.colors.lightGrey,
+              shape: BoxShape.circle,
+            ),
+            child: BaseText(
+              '$eventsCount',
+              localized: false,
+              height: 1,
+              fontSize: 10,
+              fontWeight: TypographyConst.wSemiBold,
+              color: Colors.white,
+            ),
+          ),
+      ],
     );
   }
 }

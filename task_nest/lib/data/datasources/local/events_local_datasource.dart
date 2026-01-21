@@ -121,6 +121,46 @@ class EventsLocalDataSource {
     );
   }
 
+  Future<Either<Failure, Map<DateTime, int>>> getEventsCount(
+    DateTime start,
+    int monthsCount,
+  ) async {
+    final startDate = start.dateOnly;
+    final lastDate = DateTime(
+      startDate.year,
+      startDate.month + monthsCount,
+      startDate.day,
+    );
+
+    return DataSourceHelper.executeSafe(
+      action: () async {
+        final dayExpr = db.events.timeDate;
+        final countExpr = db.events.timeDate.count();
+
+        final query = db.selectOnly(db.events)
+          ..addColumns([dayExpr, countExpr])
+          ..where(db.events.timeDate.isBetweenValues(startDate, lastDate))
+          ..groupBy([dayExpr]);
+
+        final rows = await query.get();
+
+        var resultMap = <DateTime, int>{};
+
+        for (final row in rows) {
+          final day = row.read(dayExpr);
+          final count = row.read(countExpr);
+          if (day != null && count != null) {
+            resultMap[day.dateOnly] = count;
+          }
+        }
+
+        return resultMap;
+      },
+      errorTitle:
+          "Failed to get events count between ${startDate.toString()} - ${lastDate.toString()}",
+    );
+  }
+
   Future<Either<Failure, EventDriftDto>> addEvent(EventDriftDto event) async {
     return DataSourceHelper.executeSafe(
       action: () async {

@@ -11,6 +11,7 @@ import 'package:task_nest/domain/repositories/members_repository.dart';
 import 'package:task_nest/domain/repositories/user_profile_repository.dart';
 import 'package:task_nest/domain/usecases/events/add_event_usecase.dart';
 import 'package:task_nest/domain/usecases/events/delete_event_usecase.dart';
+import 'package:task_nest/domain/usecases/events/get_events_count_usecase.dart';
 import 'package:task_nest/domain/usecases/events/update_event_usecase.dart';
 import 'package:task_nest/domain/usecases/events/get_events_between_date_usecase.dart';
 import 'package:task_nest/domain/usecases/events/get_events_by_date_usecase.dart';
@@ -83,6 +84,9 @@ class DI {
     );
     container.registerFactory(
       () => GetEventsBetweenDateUseCase(container<EventsRepository>()),
+    );
+    container.registerFactory(
+      () => GetEventsCountUseCase(container<EventsRepository>()),
     );
     container.registerFactory(
       () => AddEventUseCase(container<EventsRepository>()),

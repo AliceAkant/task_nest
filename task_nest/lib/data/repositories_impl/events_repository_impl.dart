@@ -102,6 +102,31 @@ class EventsRepositoryImpl implements EventsRepository {
   }
 
   @override
+  Future<Either<Failure, Map<DateTime, int>>> getEventsCount(
+    DateTime start,
+    int monthsCount,
+  ) async {
+    LoggerHelper.info(
+      'Try to load events count between: $start + $monthsCount months',
+    );
+
+    final result = await local.getEventsCount(start, monthsCount);
+
+    return result.fold(
+      (failure) {
+        LoggerHelper.databaseError(
+          'Load events count failed: ${failure.message}',
+        );
+        return Left(failure);
+      },
+      (map) {
+        LoggerHelper.info('Load events count success');
+        return Right(map);
+      },
+    );
+  }
+
+  @override
   Future<Either<Failure, Event>> addEvent(Event event) async {
     LoggerHelper.info('Try add event: ${event.toString()}');
 

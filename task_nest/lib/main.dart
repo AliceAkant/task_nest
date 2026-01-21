@@ -6,6 +6,7 @@ import 'package:task_nest/infrastructure/storage/sp/shared_preferences_helper.da
 import 'package:task_nest/presentation/application.dart';
 import 'package:task_nest/infrastructure/di/injection.dart';
 import 'package:task_nest/infrastructure/localization/localization_config.dart';
+import 'package:task_nest/presentation/blocs/events_count/events_count_cubit.dart';
 import 'package:task_nest/presentation/blocs/localization/localization_cubit.dart';
 import 'package:task_nest/presentation/blocs/members/members_cubit.dart';
 import 'package:task_nest/presentation/blocs/user/user_cubit.dart';
@@ -36,6 +37,7 @@ void main() async {
           ),
           BlocProvider(create: (_) => UserCubit()),
           BlocProvider(create: (_) => MembersCubit()..loadData()),
+          BlocProvider(create: (_) => EventsCountCubit()..loadData()),
         ],
         child: BlocConsumer<LocalizationCubit, LocalizationModel>(
           listener: (context, localization) {

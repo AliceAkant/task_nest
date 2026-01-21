@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:task_nest/domain/entities/event.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
 import 'package:task_nest/infrastructure/routes/app_routes.dart';
+import 'package:task_nest/presentation/blocs/events_count/events_count_cubit.dart'
+    as e;
 import 'package:task_nest/presentation/blocs/members/members_cubit.dart';
 import 'package:task_nest/presentation/blocs/schedule/schedule_cubit.dart';
 import 'package:task_nest/presentation/enum/date_filter_mode.dart';
@@ -75,6 +77,7 @@ class ScheduleScreen extends StatelessWidget {
 
     if (context.mounted && result != null) {
       cubit.updateState();
+      context.read<e.EventsCountCubit>().loadData();
     }
   }
 
@@ -83,6 +86,7 @@ class ScheduleScreen extends StatelessWidget {
 
     if (context.mounted && result != null) {
       context.read<ScheduleCubit>().updateState();
+      context.read<e.EventsCountCubit>().loadData();
     }
   }
 

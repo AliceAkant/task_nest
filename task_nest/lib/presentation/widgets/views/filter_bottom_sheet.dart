@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_nest/domain/entities/member.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
 import 'package:task_nest/domain/enums/member_theme.dart';
+import 'package:task_nest/presentation/blocs/events_count/events_count_cubit.dart';
 import 'package:task_nest/presentation/enum/member_filter_mode.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/extensions/date_time_extension.dart';
@@ -151,9 +153,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             fontWeight: TypographyConst.wSemiBold,
           ),
           const SizedBox(height: AppSizes.spacing8),
-          DatePicker(
-            initialDate: selectedDate,
-            onDateChanged: (date) => _chooseDate(date),
+          BlocBuilder<EventsCountCubit, EventsCountState>(
+            builder: (context, state) {
+              final eventsCountMap = state is DataLoaded
+                  ? state.countsMap
+                  : null;
+              // if (state is LoadError) {
+              //   context.read<EventsCountCubit>().loadData();
+              // }
+
+              return DatePicker(
+                key: ValueKey('date_filter_picker'),
+                initialDate: selectedDate,
+                eventsCountMap: eventsCountMap,
+                onDateChanged: (date) => _chooseDate(date),
+              );
+            },
           ),
           const SizedBox(height: AppSizes.spacing24),
 
