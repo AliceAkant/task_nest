@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/enum/button_kind.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/helpers/assets_helper.dart';
@@ -6,7 +7,7 @@ import 'package:task_nest/presentation/theme/app_sizes.dart';
 import 'package:task_nest/presentation/widgets/tappable_box.dart';
 
 class BorderedIconButton extends StatelessWidget {
-  final String iconSource;
+  final AppSvg iconSource;
   final VoidCallback? onTap;
   final ButtonKind kind;
   final Color? textColor;

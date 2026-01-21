@@ -11,6 +11,7 @@ import 'package:task_nest/infrastructure/routes/app_routes.dart';
 import 'package:task_nest/presentation/blocs/localization/localization_cubit.dart';
 import 'package:task_nest/presentation/blocs/settings/settings_cubit.dart';
 import 'package:task_nest/presentation/blocs/user/user_cubit.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/helpers/assets_helper.dart';
 import 'package:task_nest/presentation/widgets/cards/avatar_card.dart';
@@ -127,7 +128,7 @@ class SettingsScreen extends StatelessWidget {
                 fontWeight: TypographyConst.wSemiBold,
                 fontSize: TypographyConst.labelLarge,
               ),
-              AssetsHelper.getSvgImage("heart", width: AppSizes.size24),
+              AssetsHelper.getSvgImage(AppSvg.heart, width: AppSizes.size24),
             ],
           );
         }
@@ -209,14 +210,14 @@ class SettingsScreen extends StatelessWidget {
       children: [
         CheckableItem(
           textKey: LocaleKeys.dark_theme,
-          icon: 'moon',
+          icon: AppSvg.moon,
           isSelected: context.read<ThemeCubit>().state == ThemeMode.dark,
           onTap: () => context.read<ThemeCubit>().toggleDark(),
         ),
         _separator(context),
         CheckableItem(
           textKey: LocaleKeys.light_theme,
-          icon: 'sun',
+          icon: AppSvg.sun,
           isSelected: context.read<ThemeCubit>().state == ThemeMode.light,
           onTap: () => context.read<ThemeCubit>().toggleLight(),
         ),

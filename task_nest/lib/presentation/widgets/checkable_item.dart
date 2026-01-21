@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/helpers/assets_helper.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
@@ -6,7 +7,7 @@ import 'package:task_nest/presentation/widgets/base_text.dart';
 
 class CheckableItem extends StatelessWidget {
   final String textKey;
-  final String? icon;
+  final AppSvg? icon;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -39,7 +40,7 @@ class CheckableItem extends StatelessWidget {
             if (icon != null) const SizedBox(width: AppSizes.spacing4),
             isSelected
                 ? AssetsHelper.getSvgImage(
-                    'check_mark',
+                    AppSvg.checkMark,
                     width: AppSizes.size18,
                     color: context.colors.purple,
                   )

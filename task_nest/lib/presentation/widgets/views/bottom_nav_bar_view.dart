@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/helpers/assets_helper.dart';
 import 'package:task_nest/presentation/models/tab_item.dart';
@@ -80,7 +81,7 @@ class BottomNavBarView extends StatelessWidget {
     bool isSelected,
     double width,
     String titleKey,
-    String icon,
+    AppSvg icon,
   ) {
     return GradientRipple(
       color: context.colors.purple,

@@ -10,12 +10,15 @@ import 'package:task_nest/presentation/blocs/events_count/events_count_cubit.dar
 import 'package:task_nest/presentation/blocs/localization/localization_cubit.dart';
 import 'package:task_nest/presentation/blocs/members/members_cubit.dart';
 import 'package:task_nest/presentation/blocs/user/user_cubit.dart';
+import 'package:task_nest/presentation/helpers/assets_helper.dart';
 import 'package:task_nest/presentation/theme/theme_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   await DI().initializeDependencies();
+
+  SvgCacheManager.precacheAppSvgList();
 
   final themeMode = await SharedPreferencesHelper.getThemeMode();
 

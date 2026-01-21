@@ -5,6 +5,7 @@ import 'package:task_nest/domain/entities/member.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
 import 'package:task_nest/infrastructure/routes/app_routes.dart';
 import 'package:task_nest/presentation/blocs/members/members_cubit.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/enum/button_kind.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/helpers/assets_helper.dart';
@@ -105,7 +106,7 @@ class MembersListView extends StatelessWidget {
           ),
           const SizedBox(width: AppSizes.spacing4),
           BorderedIconButton(
-            iconSource: 'refresh',
+            iconSource: AppSvg.refresh,
             kind: ButtonKind.error,
             isEnabled: true,
             onTap: () => context.read<MembersCubit>().loadData(),
@@ -147,7 +148,7 @@ class MembersListView extends StatelessWidget {
         child: Row(
           children: [
             AssetsHelper.getSvgImage(
-              'add_person',
+              AppSvg.addPerson,
               height: AppSizes.size24,
               color: context.colors.labelPrimary,
             ),

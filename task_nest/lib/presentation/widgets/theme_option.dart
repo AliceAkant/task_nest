@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_nest/domain/enums/member_theme.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/helpers/assets_helper.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
@@ -39,7 +40,10 @@ class ThemeOption extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             if (theme == MemberTheme.none)
-              AssetsHelper.getSvgImage('no_avatar', height: AppSizes.size24),
+              AssetsHelper.getSvgImage(
+                AppSvg.noAvatar,
+                height: AppSizes.size24,
+              ),
           ],
         ),
       ),

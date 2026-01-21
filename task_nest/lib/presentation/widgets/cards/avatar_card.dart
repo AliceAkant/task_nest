@@ -47,23 +47,25 @@ class AvatarCard extends StatelessWidget {
         alignment: Alignment.center,
         fit: StackFit.expand,
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSizes.spacing4),
-            decoration: BoxDecoration(
-              color: disabled
-                  ? context.colors.disable
-                  : theme?.color ?? context.colors.lightPurple40,
-              shape: BoxShape.circle,
-              border: Border.all(
+          RepaintBoundary(
+            child: Container(
+              padding: const EdgeInsets.all(AppSizes.spacing4),
+              decoration: BoxDecoration(
                 color: disabled
-                    ? context.colors.borderDisabled
-                    : theme?.borderColor ?? context.colors.purple,
-                width: AppSizes.border2,
+                    ? context.colors.disable
+                    : theme?.color ?? context.colors.lightPurple40,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: disabled
+                      ? context.colors.borderDisabled
+                      : theme?.borderColor ?? context.colors.purple,
+                  width: AppSizes.border2,
+                ),
               ),
-            ),
-            child: AssetsHelper.getSvgImage(
-              avatar.icon,
-              height: AppSizes.size24,
+              child: AssetsHelper.getSvgImage(
+                avatar.asset,
+                height: AppSizes.size24,
+              ),
             ),
           ),
           if (disabled)

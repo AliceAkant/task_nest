@@ -8,6 +8,7 @@ import 'package:task_nest/presentation/blocs/event_form/event_form_cubit.dart';
 import 'package:task_nest/presentation/blocs/event_form/event_form_state.dart';
 import 'package:task_nest/presentation/blocs/members/members_cubit.dart';
 import 'package:task_nest/presentation/blocs/user/user_cubit.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/enum/form_mode.dart';
 import 'package:task_nest/presentation/enum/popup_result.dart';
 import 'package:task_nest/presentation/enum/popup_style.dart';
@@ -67,7 +68,7 @@ class EventFormScreen extends StatelessWidget {
       message: LocaleKeys.delete_event_popup_message,
       submitText: LocaleKeys.cancel,
       cancelText: LocaleKeys.delete,
-      iconSource: 'attention',
+      iconSource: AppSvg.attention,
     );
     if (context.mounted && result == PopupResult.cancel) {
       final cubit = context.read<EventFormCubit>();

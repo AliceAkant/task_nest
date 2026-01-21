@@ -5,6 +5,7 @@ import 'package:task_nest/infrastructure/routes/app_routes.dart';
 import 'package:task_nest/presentation/blocs/bottom_navigation/bottom_navigation_cubit.dart';
 import 'package:task_nest/presentation/blocs/schedule/schedule_cubit.dart';
 import 'package:task_nest/presentation/blocs/settings/settings_cubit.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/models/tab_item.dart';
 import 'package:task_nest/presentation/screens/schedule_screen.dart';
@@ -20,13 +21,13 @@ class MainScreen extends StatelessWidget {
     TabItem(
       AppRoutes.schedule,
       LocaleKeys.schedule,
-      'calendar_edit',
+      AppSvg.calendarEdit,
       ScheduleScreen(key: PageStorageKey('schedule')),
     ),
     TabItem(
       AppRoutes.settings,
       LocaleKeys.settings,
-      'settings',
+      AppSvg.settings,
       SettingsScreen(key: PageStorageKey('settings')),
     ),
   ];

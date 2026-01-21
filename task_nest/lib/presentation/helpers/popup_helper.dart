@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/enum/button_kind.dart';
 import 'package:task_nest/presentation/enum/popup_result.dart';
 import 'package:task_nest/presentation/enum/popup_style.dart';
@@ -32,7 +33,7 @@ class PopupHelper {
     required String message,
     required String submitText,
     required String cancelText,
-    String? iconSource,
+    AppSvg? iconSource,
     Function()? onSubmit,
     Function()? onCancel,
     PopupStyle style = PopupStyle.base,
@@ -62,7 +63,7 @@ class PopupHelper {
     required String title,
     required String message,
     required String submitText,
-    String? iconSource,
+    AppSvg? iconSource,
     Function()? onSubmit,
     PopupStyle style = PopupStyle.base,
     double? hPadding,
@@ -169,7 +170,7 @@ class PopupHelper {
     BuildContext context, {
     required String title,
     required String message,
-    String? iconSource,
+    AppSvg? iconSource,
     required String submitText,
     String? cancelText,
     PopupStyle style = PopupStyle.base,

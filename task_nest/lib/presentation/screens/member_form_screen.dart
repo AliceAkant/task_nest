@@ -6,6 +6,7 @@ import 'package:task_nest/infrastructure/localization/locale_keys.dart';
 import 'package:task_nest/presentation/blocs/member_form/member_form_cubit.dart';
 import 'package:task_nest/presentation/blocs/member_form/member_form_state.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/enum/form_mode.dart';
 import 'package:task_nest/domain/enums/member_theme.dart';
 import 'package:task_nest/presentation/enum/popup_result.dart';
@@ -50,7 +51,7 @@ class MemberFormScreen extends StatelessWidget {
       message: LocaleKeys.delete_member_popup_message,
       submitText: LocaleKeys.cancel,
       cancelText: LocaleKeys.delete,
-      iconSource: 'attention',
+      iconSource: AppSvg.attention,
     );
     if (context.mounted && result == PopupResult.cancel) {
       final cubit = context.read<MemberFormCubit>();

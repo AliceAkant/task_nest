@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
 import 'package:task_nest/presentation/blocs/members/members_cubit.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/enum/button_kind.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
@@ -43,7 +44,7 @@ class LoadMembersErrorStateView extends StatelessWidget {
           ),
           const SizedBox(width: AppSizes.spacing4),
           BorderedIconButton(
-            iconSource: 'refresh',
+            iconSource: AppSvg.refresh,
             kind: ButtonKind.error,
             isEnabled: true,
             onTap: () => context.read<MembersCubit>().loadData(),

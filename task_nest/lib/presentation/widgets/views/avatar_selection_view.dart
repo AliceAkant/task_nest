@@ -17,25 +17,23 @@ class AvatarSelectionView extends StatelessWidget {
     super.key,
   });
 
-  List<Avatar> get _avatars {
-    var allAvatars = <Avatar>[...Avatar.values];
-    allAvatars.remove(Avatar.none);
-
-    return allAvatars;
-  }
+  static final List<Avatar> _filteredAvatars = Avatar.values
+      .where((a) => a != Avatar.none)
+      .toList();
 
   @override
   Widget build(BuildContext context) {
-    final avatarsList = excludeNone ? _avatars : Avatar.values;
+    final avatarsList = excludeNone ? _filteredAvatars : Avatar.values;
     return Wrap(
       runSpacing: AppSizes.spacing4,
       spacing: AppSizes.spacing8,
       alignment: center ? WrapAlignment.center : WrapAlignment.start,
-      children: _avatars
+      children: avatarsList
           .map(
             (a) => AvatarOption(
+              key: ValueKey(a),
               isSelected: (seclectedItem ?? avatarsList.first) == a,
-              asset: a.icon,
+              asset: a.asset,
               onTap: () => onSelect?.call(a),
             ),
           )

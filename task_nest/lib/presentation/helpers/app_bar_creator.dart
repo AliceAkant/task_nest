@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/helpers/assets_helper.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
@@ -11,7 +12,7 @@ class AppBarCreator {
   static AppBar generic(
     BuildContext context, {
     required String titleKey,
-    String? actionIcon,
+    AppSvg? actionAsset,
     bool actionDisabled = false,
     Function()? actionTap,
   }) {
@@ -25,25 +26,27 @@ class AppBarCreator {
         fontSize: TypographyConst.labelHeader,
       ),
       actions: [
-        if (actionIcon != null && !actionDisabled)
+        if (actionAsset != null && !actionDisabled)
           TappableBox(
             borderRadius: BorderRadius.circular(AppSizes.size24),
             onTap: () => actionTap?.call(),
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSizes.spacing8,
-                vertical: AppSizes.spacing8,
-              ),
-              margin: EdgeInsets.only(right: AppSizes.spacing4),
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(AppSizes.barRadius),
+            child: RepaintBoundary(
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSizes.spacing8,
+                  vertical: AppSizes.spacing8,
                 ),
-              ),
-              child: AssetsHelper.getSvgImage(
-                actionIcon,
-                height: AppSizes.size32,
-                color: context.colors.labelPrimary,
+                margin: EdgeInsets.only(right: AppSizes.spacing4),
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(AppSizes.barRadius),
+                  ),
+                ),
+                child: AssetsHelper.getSvgImage(
+                  actionAsset,
+                  height: AppSizes.size32,
+                  color: context.colors.labelPrimary,
+                ),
               ),
             ),
           ),
