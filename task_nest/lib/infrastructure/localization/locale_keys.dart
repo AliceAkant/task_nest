@@ -86,4 +86,7 @@ class LocaleKeys {
   static const delete_event_popup_message = 'delete_event_popup_message';
   static const error_snack_title = 'error_snack_title';
   static const error_snack_message = 'error_snack_message';
+  static const remind_me = 'remind_me';
+  static const no_reminder = 'no_reminder';
+  static const notification_scheduled_at = 'notification_scheduled_at';
 }

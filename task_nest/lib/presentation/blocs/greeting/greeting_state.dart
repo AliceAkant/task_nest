@@ -22,7 +22,7 @@ class GreetingState extends Equatable {
   factory GreetingState.initial() {
     return GreetingState(
       name: '',
-      avatar: Avatar.values.elementAt(1),
+      avatar: Avatar.dog,
       validationMode: false,
       isValid: false,
       isSaving: false,

@@ -2,8 +2,12 @@ import 'dart:ui';
 
 class ColorConverter {
   static Color fromHex(String hexString) {
-    hexString = hexString.replaceFirst('#', '');
-    return Color(int.parse(hexString, radix: 16));
+    try {
+      final cleaned = hexString.replaceFirst('#', '');
+      return Color(int.parse(cleaned, radix: 16));
+    } catch (_) {
+      return const Color(0x00000000);
+    }
   }
 
   static String toHex(Color color) {

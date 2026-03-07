@@ -3,7 +3,7 @@ import 'package:task_nest/domain/enums/avatar.dart';
 import 'package:task_nest/presentation/blocs/base_form/base_form_state.dart';
 import 'package:task_nest/presentation/enum/schedule_filter_mode.dart';
 
-class ProfileState extends FormState {
+class ProfileState extends BaseFormState {
   final String userName;
   final Avatar avatar;
   final DefaultScheduleFilterMode scheduleFilterMode;

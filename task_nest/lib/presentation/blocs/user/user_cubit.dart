@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_nest/core/error/failures.dart';
+import 'package:task_nest/core/logger/logger_helper.dart';
 import 'package:task_nest/domain/entities/user_profile.dart';
 import 'package:task_nest/domain/entities/user_settings.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
@@ -35,7 +36,10 @@ class UserCubit extends Cubit<UserProfile?> {
   Future loadUser() async {
     final result = await _getUserUC.call();
 
-    result.fold((failure) {}, (user) => emit(user));
+    result.fold(
+      (failure) => LoggerHelper.databaseError('Load user failed: ${failure.message}'),
+      (user) => emit(user),
+    );
   }
 
   Future<Either<Failure, bool>> update(UserProfile newUser) async {

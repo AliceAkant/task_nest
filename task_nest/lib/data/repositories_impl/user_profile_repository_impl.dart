@@ -24,7 +24,7 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
     return result.fold(
       (failure) {
         LoggerHelper.databaseError(
-          'User nitialization failed: ${failure.message}',
+          'User initialization failed: ${failure.message}',
         );
         return Left(failure);
       },

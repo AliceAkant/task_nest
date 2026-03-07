@@ -1,19 +1,19 @@
 import 'package:equatable/equatable.dart';
 
-abstract class FormState extends Equatable {
+abstract class BaseFormState extends Equatable {
   final bool isSaving;
   final bool hasError;
   final String? errorMessage;
   final bool? completed;
 
-  const FormState({
+  const BaseFormState({
     required this.isSaving,
     required this.hasError,
     this.errorMessage,
     this.completed,
   });
 
-  FormState copyWith({
+  BaseFormState copyWith({
     bool? isSaving,
     bool? hasError,
     String? errorMessage,

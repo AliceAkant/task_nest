@@ -11,19 +11,15 @@ class SplashCubit extends Cubit<SplashState> {
   SplashCubit(this._userCubit) : super(SplashInitial());
 
   Future startApp() async {
-    String initialScreen = AppRoutes.greeting;
-    bool isUserExist = false;
-
     // Animation of splash
-    var delayTask = Future.delayed(const Duration(seconds: 3));
+    await Future.wait([
+      Future.delayed(const Duration(seconds: 3)),
+      _userCubit.loadUser(),
+    ]);
 
-    var isExistTask = _userCubit.loadUser().then(
-      (user) => isUserExist = _userCubit.state != null,
-    );
-
-    await Future.wait([delayTask, isExistTask]);
-
-    initialScreen = isUserExist ? AppRoutes.schedule : AppRoutes.greeting;
+    final initialScreen = _userCubit.state != null
+        ? AppRoutes.schedule
+        : AppRoutes.greeting;
 
     emit(SplashFinished(route: initialScreen));
   }

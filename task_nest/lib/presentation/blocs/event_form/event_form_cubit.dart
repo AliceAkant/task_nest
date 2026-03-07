@@ -1,9 +1,11 @@
 import 'package:task_nest/domain/entities/event.dart';
 import 'package:task_nest/domain/entities/member.dart';
+import 'package:task_nest/domain/enums/reminder_offset.dart';
 import 'package:task_nest/domain/usecases/events/add_event_usecase.dart';
 import 'package:task_nest/domain/usecases/events/delete_event_usecase.dart';
 import 'package:task_nest/domain/usecases/events/update_event_usecase.dart';
 import 'package:task_nest/infrastructure/di/injection.dart';
+import 'package:task_nest/infrastructure/notifications/notification_service.dart';
 import 'package:task_nest/presentation/blocs/base_form/base_form_cubit.dart';
 import 'package:task_nest/presentation/enum/form_mode.dart';
 import 'package:task_nest/presentation/extensions/date_time_extension.dart';
@@ -13,14 +15,25 @@ class EventFormCubit extends FormCubit<EventFormState> {
   final AddEventUseCase _addEventUC;
   final UpdateEventUseCase _editEventUC;
   final DeleteEventUseCase _deleteEventUC;
+  final NotificationService _notificationService;
 
   EventFormCubit(FormMode mode, Event? initialEvent, DateTime? initialDate)
     : _addEventUC = DI.container<AddEventUseCase>(),
       _editEventUC = DI.container<UpdateEventUseCase>(),
       _deleteEventUC = DI.container<DeleteEventUseCase>(),
+      _notificationService = DI.container<NotificationService>(),
       super(
         EventFormState.initial(mode, initialEvent, _getCustomTime(initialDate)),
-      );
+      ) {
+    if (initialEvent?.id != null) {
+      _loadReminders(initialEvent!.id!);
+    }
+  }
+
+  Future<void> _loadReminders(int eventId) async {
+    final reminders = await _notificationService.loadEventReminders(eventId);
+    emit(state.copyWith(reminders: reminders));
+  }
 
   ///
   /// CHANGE HENDLERS
@@ -48,6 +61,18 @@ class EventFormCubit extends FormCubit<EventFormState> {
 
   void memberChanged(Member member) =>
       emit(state.copyWith(assignedMember: member));
+
+  void clearReminders() => emit(state.copyWith(reminders: {}));
+
+  void reminderToggled(ReminderOffset reminder) {
+    final current = Set<ReminderOffset>.from(state.reminders);
+    if (current.contains(reminder)) {
+      current.remove(reminder);
+    } else {
+      current.add(reminder);
+    }
+    emit(state.copyWith(reminders: current));
+  }
 
   ///
   /// METHODS
@@ -78,7 +103,12 @@ class EventFormCubit extends FormCubit<EventFormState> {
 
     processUseCaseResult<Event>(
       result,
-      onSuccess: (savedEvent) => emitComplete(),
+      onSuccess: (savedEvent) async {
+        if (savedEvent.id != null && state.reminders.isNotEmpty) {
+          await _scheduleReminders(savedEvent.id!, savedEvent.title);
+        }
+        emitComplete();
+      },
     );
   }
 
@@ -96,7 +126,10 @@ class EventFormCubit extends FormCubit<EventFormState> {
 
       processUseCaseResult<Event>(
         result,
-        onSuccess: (updatedEvent) => emitComplete(),
+        onSuccess: (updatedEvent) async {
+          await _scheduleReminders(state.eventId!, updatedEvent.title);
+          emitComplete();
+        },
       );
     } else {
       emitError(null);
@@ -107,8 +140,28 @@ class EventFormCubit extends FormCubit<EventFormState> {
     if (state.eventId != null) {
       final result = await _deleteEventUC.call(state.eventId!);
 
-      processUseCaseResult<bool>(result, onSuccess: (_) => emitComplete());
+      processUseCaseResult<bool>(
+        result,
+        onSuccess: (_) async {
+          await _notificationService.cancelEventReminders(state.eventId!);
+          await _notificationService.clearEventReminders(state.eventId!);
+          emitComplete();
+        },
+      );
+    } else {
+      emitError(null);
     }
+  }
+
+  Future<void> _scheduleReminders(int eventId, String eventTitle) async {
+    await _notificationService.scheduleEventReminders(
+      eventId: eventId,
+      eventTitle: eventTitle,
+      eventDateTime: state.date,
+      reminders: state.reminders,
+      memberName: state.assignedMember?.name,
+    );
+    await _notificationService.saveEventReminders(eventId, state.reminders);
   }
 
   static DateTime _getCustomTime(DateTime? initialDate) {

@@ -78,5 +78,8 @@
   "delete_event_popup_title": "Are you sure you want to delete this event?",
   "delete_event_popup_message": "This action cannot be undone",
   "error_snack_title": "Oops! Something went wrong.",
-  "error_snack_message": "Please try again."
+  "error_snack_message": "Please try again.",
+  "remind_me": "Remind me",
+  "no_reminder": "Don't remind",
+  "notification_scheduled_at": "Scheduled at {time}"
 }

@@ -83,6 +83,8 @@ class MemberFormCubit extends FormCubit<MemberFormState> {
       final result = await _deleteMemberUC.call(state.memberId!);
 
       processUseCaseResult<bool>(result, onSuccess: (_) => emitComplete());
+    } else {
+      emitError(null);
     }
   }
 }

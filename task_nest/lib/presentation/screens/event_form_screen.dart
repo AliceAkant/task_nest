@@ -1,9 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_nest/domain/entities/event.dart';
+import 'package:task_nest/domain/entities/member.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
+import 'package:task_nest/infrastructure/notifications/notification_service.dart';
+import 'package:task_nest/infrastructure/di/injection.dart';
 import 'package:task_nest/presentation/blocs/event_form/event_form_cubit.dart';
 import 'package:task_nest/presentation/blocs/event_form/event_form_state.dart';
 import 'package:task_nest/presentation/blocs/members/members_cubit.dart';
@@ -24,6 +28,7 @@ import 'package:task_nest/presentation/widgets/form_buttons_row.dart';
 import 'package:task_nest/presentation/widgets/states/load_members_error_state_view.dart';
 import 'package:task_nest/presentation/widgets/title_block.dart';
 import 'package:task_nest/presentation/widgets/member_drop_down.dart';
+import 'package:task_nest/presentation/widgets/reminder_dropdown.dart';
 import 'package:task_nest/presentation/widgets/switcher.dart';
 import 'package:task_nest/presentation/widgets/text_input.dart';
 import 'package:task_nest/presentation/widgets/time_picker.dart';
@@ -163,6 +168,11 @@ class EventFormScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSizes.spacing16),
 
+                    // REMINDERS
+                    _remindersView(context, state, cubit),
+
+                    const SizedBox(height: AppSizes.spacing16),
+
                     // MEMBER
                     _assignView(context),
 
@@ -177,6 +187,7 @@ class EventFormScreen extends StatelessWidget {
                         onTextChanged: cubit.notesChanged,
                       ),
                     ),
+                    const SizedBox(height: AppSizes.spacing16),
 
                     // BUTTONS
                     const SizedBox(height: AppSizes.spacing24),
@@ -201,58 +212,83 @@ class EventFormScreen extends StatelessWidget {
   Widget _assignView(BuildContext context) {
     final cubit = context.read<EventFormCubit>();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: AppSizes.spacing8),
-        _assignToMeView(
-          context,
-          cubit.state.assignToMe,
-          (value) => cubit.assignToMeChanged(value),
-        ),
+    return BlocBuilder<MembersCubit, MembersState>(
+      builder: (context, memberState) {
+        final members = memberState is DataLoaded
+            ? memberState.members
+            : <Member>[];
+        final hasMembers = members.isNotEmpty;
 
-        if (!cubit.state.assignToMe)
-          BlocBuilder<MembersCubit, MembersState>(
-            builder: (context, memberState) {
-              if (memberState is DataLoaded) {
-                final members = memberState.members;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AppSizes.spacing8),
+            _assignToMeView(
+              context,
+              cubit.state.assignToMe,
+              hasMembers: hasMembers,
+              (value) => cubit.assignToMeChanged(value),
+            ),
 
-                if (members.isNotEmpty) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: AppSizes.spacing8),
-                      TitleBlock(
-                        titleKey: LocaleKeys.choose_member,
-                        child: MemberDropdown(
-                          members: members,
-                          initialValue: cubit.state.assignedMember,
-                          hintKey: LocaleKeys.select_member,
-                          onChanged: cubit.memberChanged,
-                        ),
+            if (!cubit.state.assignToMe)
+              if (memberState is DataLoaded && hasMembers)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: AppSizes.spacing8),
+                    TitleBlock(
+                      titleKey: LocaleKeys.choose_member,
+                      child: MemberDropdown(
+                        members: members,
+                        initialValue: cubit.state.assignedMember,
+                        hintKey: LocaleKeys.select_member,
+                        onChanged: cubit.memberChanged,
                       ),
-                    ],
-                  );
-                } else {
-                  return const SizedBox();
-                }
-              } else if (memberState is LoadError) {
-                return LoadMembersErrorStateView();
-              }
-              return const Center(child: CircularProgressIndicator());
-            },
-          ),
+                    ),
+                  ],
+                )
+              else if (memberState is LoadError)
+                LoadMembersErrorStateView()
+              else if (memberState is! DataLoaded)
+                const Center(child: CircularProgressIndicator()),
 
-        const SizedBox(height: AppSizes.spacing16),
-      ],
+            const SizedBox(height: AppSizes.spacing16),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _remindersView(
+    BuildContext context,
+    EventFormState state,
+    EventFormCubit cubit,
+  ) {
+    final isRu = context.locale.languageCode == 'ru';
+
+    return TitleBlock(
+      titleKey: LocaleKeys.remind_me,
+      child: ReminderDropdown(
+        selectedReminders: state.reminders,
+        isRussian: isRu,
+        noReminderKey: LocaleKeys.no_reminder,
+        onToggled: (reminder) async {
+          if (!state.reminders.contains(reminder)) {
+            await DI.container<NotificationService>().requestPermissions();
+          }
+          cubit.reminderToggled(reminder);
+        },
+        onNoReminderSelected: cubit.clearReminders,
+      ),
     );
   }
 
   Widget _assignToMeView(
     BuildContext context,
     bool isTrue,
-    ValueChanged<bool> onChanged,
-  ) {
+    ValueChanged<bool> onChanged, {
+    required bool hasMembers,
+  }) {
     return Row(
       children: [
         AvatarCard(
@@ -272,7 +308,13 @@ class EventFormScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSizes.spacing8),
-        Switcher(initialValue: isTrue, onChanged: (value) => onChanged(value)),
+        IgnorePointer(
+          ignoring: !hasMembers && isTrue,
+          child: Switcher(
+            initialValue: isTrue,
+            onChanged: (value) => onChanged(value),
+          ),
+        ),
       ],
     );
   }

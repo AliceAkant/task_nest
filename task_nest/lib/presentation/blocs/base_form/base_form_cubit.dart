@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_nest/core/error/failures.dart';
 import 'package:task_nest/presentation/blocs/base_form/base_form_state.dart';
 
-abstract class FormCubit<S extends FormState> extends Cubit<S> {
+abstract class FormCubit<S extends BaseFormState> extends Cubit<S> {
   FormCubit(super.initialState);
 
   ///

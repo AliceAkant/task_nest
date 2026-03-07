@@ -4,7 +4,7 @@ import 'package:task_nest/presentation/blocs/base_form/base_form_state.dart';
 import 'package:task_nest/presentation/enum/form_mode.dart';
 import 'package:task_nest/domain/enums/member_theme.dart';
 
-class MemberFormState extends FormState {
+class MemberFormState extends BaseFormState {
   final FormMode mode;
   final int? memberId;
   final String name;

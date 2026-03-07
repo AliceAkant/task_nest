@@ -23,6 +23,7 @@ import 'package:task_nest/domain/usecases/events/get_all_events_usecase.dart';
 import 'package:task_nest/domain/usecases/user/get_user_usecase.dart';
 import 'package:task_nest/domain/usecases/user/initialize_user_usecase.dart';
 import 'package:task_nest/domain/usecases/user/update_user_usecase.dart';
+import 'package:task_nest/infrastructure/notifications/notification_service.dart';
 import 'package:task_nest/infrastructure/storage/drift/app_database.dart';
 
 class DI {
@@ -33,6 +34,7 @@ class DI {
     container.registerSingleton<AppDatabase>(db);
 
     container.registerSingleton<LoggerService>(LoggerService());
+    container.registerSingleton<NotificationService>(NotificationService());
 
     ///
     /// DataSource

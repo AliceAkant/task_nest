@@ -33,11 +33,14 @@ class _MemberDropdownState extends State<MemberDropdown>
   final LayerLink _layerLink = LayerLink();
 
   bool _isFocused = false;
+  bool _thumbVisible = false;
   Member? _selectedItem;
+  final ScrollController _scrollController = ScrollController();
 
   static const double _overlayTopSpace = AppSizes.spacing4;
   static const double _itemHeight = AppSizes.size54;
   static const double _listSpacing = AppSizes.spacing8;
+  static const double _visibleItems = 2.5;
 
   @override
   void initState() {
@@ -58,13 +61,19 @@ class _MemberDropdownState extends State<MemberDropdown>
   }
 
   void _openDropdown() {
+    _thumbVisible = false;
     _overlayEntry = _createOverlayEntry();
     Overlay.of(context).insert(_overlayEntry!);
     _arrowController.forward();
     _setFocus(true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _thumbVisible = true;
+      _overlayEntry?.markNeedsBuild();
+    });
   }
 
   void _closeDropdown() {
+    _thumbVisible = false;
     _overlayEntry?.remove();
     _overlayEntry = null;
     _arrowController.reverse();
@@ -88,6 +97,7 @@ class _MemberDropdownState extends State<MemberDropdown>
   @override
   void dispose() {
     _arrowController.dispose();
+    _scrollController.dispose();
     _overlayEntry?.remove();
     super.dispose();
   }
@@ -133,9 +143,9 @@ class _MemberDropdownState extends State<MemberDropdown>
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
 
-    final maxHeight = widget.members.length <= 3
+    final maxHeight = widget.members.length <= _visibleItems
         ? widget.members.length * _itemHeight + _listSpacing * 2
-        : 3 * _itemHeight;
+        : _visibleItems * _itemHeight + _listSpacing * 2;
 
     return OverlayEntry(
       builder: (context) => Stack(
@@ -176,16 +186,28 @@ class _MemberDropdownState extends State<MemberDropdown>
                   ),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxHeight: maxHeight),
-                    child: ListView.builder(
+                    child: RawScrollbar(
+                      controller: _scrollController,
+                      thumbVisibility:
+                          _thumbVisible &&
+                          widget.members.length > _visibleItems,
+                      thickness: 3,
+                      radius: const Radius.circular(4),
                       padding: const EdgeInsets.symmetric(
                         vertical: _listSpacing,
                       ),
-                      itemCount: widget.members.length,
-                      itemBuilder: (context, index) => _MemberItemView(
-                        member: widget.members[index],
-                        onSelect: _select,
-                        selectedId: _selectedItem?.id,
-                        height: _itemHeight,
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: _listSpacing,
+                        ),
+                        itemCount: widget.members.length,
+                        itemBuilder: (context, index) => _MemberItemView(
+                          member: widget.members[index],
+                          onSelect: _select,
+                          selectedId: _selectedItem?.id,
+                          height: _itemHeight,
+                        ),
                       ),
                     ),
                   ),

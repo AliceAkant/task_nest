@@ -78,5 +78,8 @@
   "delete_event_popup_title": "Вы уверены, что хотите удалить событие?",
   "delete_event_popup_message": "Это действие невозможно отменить",
   "error_snack_title": "Упс! Кажется, возникла проблемка",
-  "error_snack_message": "Попробуйте ещё раз"
+  "error_snack_message": "Попробуйте ещё раз",
+  "remind_me": "Напомнить",
+  "no_reminder": "Не напоминать",
+  "notification_scheduled_at": "Запланировано в {time}"
 }

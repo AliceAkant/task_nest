@@ -26,6 +26,10 @@ class GreetingCubit extends Cubit<GreetingState> {
 
     await _userCubit.initializeUser(state.name, state.avatar);
 
-    emit(state.copyWith(isSaving: false, completed: true));
+    if (_userCubit.state != null) {
+      emit(state.copyWith(isSaving: false, completed: true));
+    } else {
+      emit(state.copyWith(isSaving: false));
+    }
   }
 }

@@ -1,10 +1,11 @@
 import 'package:task_nest/domain/entities/event.dart';
 import 'package:task_nest/domain/entities/member.dart';
+import 'package:task_nest/domain/enums/reminder_offset.dart';
 import 'package:task_nest/presentation/blocs/base_form/base_form_state.dart';
 import 'package:task_nest/presentation/enum/form_mode.dart';
 import 'package:task_nest/presentation/extensions/date_time_extension.dart';
 
-class EventFormState extends FormState {
+class EventFormState extends BaseFormState {
   final FormMode mode;
   final int? eventId;
   final String title;
@@ -14,6 +15,7 @@ class EventFormState extends FormState {
   final Member? assignedMember;
   final bool validationMode;
   final bool isTitleValid;
+  final Set<ReminderOffset> reminders;
 
   const EventFormState({
     required this.mode,
@@ -25,6 +27,7 @@ class EventFormState extends FormState {
     required this.assignedMember,
     required this.validationMode,
     required this.isTitleValid,
+    required this.reminders,
 
     required super.isSaving,
     required super.hasError,
@@ -50,6 +53,7 @@ class EventFormState extends FormState {
       assignedMember: initialEvent?.member,
       validationMode: false,
       isTitleValid: true,
+      reminders: const {},
       isSaving: false,
       hasError: false,
       completed: false,
@@ -66,6 +70,7 @@ class EventFormState extends FormState {
     Member? assignedMember,
     bool? validationMode,
     bool? isTitleValid,
+    Set<ReminderOffset>? reminders,
 
     bool? isSaving,
     bool? hasError,
@@ -84,6 +89,7 @@ class EventFormState extends FormState {
           : (assignedMember ?? this.assignedMember),
       validationMode: validationMode ?? this.validationMode,
       isTitleValid: isTitleValid ?? this.isTitleValid,
+      reminders: reminders ?? this.reminders,
 
       isSaving: isSaving ?? this.isSaving,
       completed: completed ?? this.completed,
@@ -103,9 +109,9 @@ class EventFormState extends FormState {
     assignedMember,
     validationMode,
     isTitleValid,
+    reminders,
     isSaving,
     hasError,
-
     completed,
     errorMessage,
   ];
