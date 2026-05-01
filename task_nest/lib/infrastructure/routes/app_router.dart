@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -23,7 +24,7 @@ class AppRouter {
 
   static final GoRouter _router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
     initialLocation: AppRoutes.splash,
     routes: [
       GoRoute(

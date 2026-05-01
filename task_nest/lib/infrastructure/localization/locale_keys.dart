@@ -25,6 +25,8 @@ class LocaleKeys {
   static const reset = 'reset';
   static const today = 'today';
   static const tomorrow = 'tomorrow';
+  static const week = 'week';
+  static const month = 'month';
   static const ok = 'ok';
   static const update = 'update';
   static const avatar = 'avatar';

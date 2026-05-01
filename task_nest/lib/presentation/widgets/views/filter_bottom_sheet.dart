@@ -39,12 +39,14 @@ class FilterBottomSheet extends StatefulWidget {
   final Member? initialMember;
   final DateTime? initialDate;
   final List<Member> members;
+  final bool showDateFilter;
 
   const FilterBottomSheet({
     required this.memberFilterMode,
     required this.members,
     required this.initialDate,
     this.initialMember,
+    this.showDateFilter = true,
     super.key,
   });
 
@@ -148,29 +150,29 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           const SizedBox(height: AppSizes.spacing12),
 
           // DATE
-          BaseText.secondary(
-            LocaleKeys.choose_date,
-            fontWeight: TypographyConst.wSemiBold,
-          ),
-          const SizedBox(height: AppSizes.spacing8),
-          BlocBuilder<EventsCountCubit, EventsCountState>(
-            builder: (context, state) {
-              final eventsCountMap = state is DataLoaded
-                  ? state.countsMap
-                  : null;
-              // if (state is LoadError) {
-              //   context.read<EventsCountCubit>().loadData();
-              // }
+          if (widget.showDateFilter) ...[
+            BaseText.secondary(
+              LocaleKeys.choose_date,
+              fontWeight: TypographyConst.wSemiBold,
+            ),
+            const SizedBox(height: AppSizes.spacing8),
+            BlocBuilder<EventsCountCubit, EventsCountState>(
+              builder: (context, state) {
+                final eventsCountMap = state is DataLoaded
+                    ? state.countsMap
+                    : null;
 
-              return DatePicker(
-                key: ValueKey('date_filter_picker'),
-                initialDate: selectedDate,
-                eventsCountMap: eventsCountMap,
-                onDateChanged: (date) => _chooseDate(date),
-              );
-            },
-          ),
-          const SizedBox(height: AppSizes.spacing24),
+                return DatePicker(
+                  key: ValueKey('date_filter_picker'),
+                  initialDate: selectedDate,
+                  eventsCountMap: eventsCountMap,
+                  onDateChanged: (date) => _chooseDate(date),
+                );
+              },
+            ),
+            const SizedBox(height: AppSizes.spacing24),
+          ] else
+            const SizedBox(height: AppSizes.spacing24),
 
           // BUTTONS
           RoundedButton(

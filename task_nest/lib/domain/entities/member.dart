@@ -1,14 +1,15 @@
+import 'package:equatable/equatable.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
 import 'package:task_nest/domain/enums/member_theme.dart';
 import 'package:task_nest/domain/helpers/enum_converters.dart';
 
-class Member {
+class Member extends Equatable {
   final int? id;
   final String name;
   final MemberTheme theme;
   final Avatar avatar;
 
-  Member({
+  const Member({
     required this.id,
     required this.name,
     required this.avatar,
@@ -22,6 +23,9 @@ class Member {
     required this.name,
   }) : avatar = EnumConverters.avatarFromKey(avatarKey),
        theme = EnumConverters.memberThemeFromHexColor(colorHex);
+
+  @override
+  List<Object?> get props => [id, name, theme, avatar];
 
   @override
   String toString() {

@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -38,12 +39,7 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: AppBarCreator.generic(context, titleKey: LocaleKeys.settings),
-
-      body: BlocBuilder<SettingsCubit, SettingsState>(
-        builder: (context, state) {
-          return _dataState(context);
-        },
-      ),
+      body: _dataState(context),
     );
   }
 
@@ -83,22 +79,24 @@ class SettingsScreen extends StatelessWidget {
               titleKey: LocaleKeys.notifications,
               child: _notificationsView(context),
             ),
-            // TODO: remove (test option)
-            TappableBox(
-              backgroundColor: context.colors.error.withAlpha(40),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSizes.spacing12),
-                child: BaseText('Exit'),
-              ),
-              onTap: () async {
-                var sh = await SharedPreferencesFactory.get();
-                sh.clearExcept([]);
 
-                if (context.mounted) {
-                  context.go(AppRoutes.splash);
-                }
-              },
-            ),
+            if (kDebugMode) ...[
+              TappableBox(
+                backgroundColor: context.colors.error.withAlpha(40),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSizes.spacing12),
+                  child: BaseText('Exit [DEBUG]'),
+                ),
+                onTap: () async {
+                  var sh = await SharedPreferencesFactory.get();
+                  sh.clearExcept([]);
+
+                  if (context.mounted) {
+                    context.go(AppRoutes.splash);
+                  }
+                },
+              ),
+            ],
             const SizedBox(height: AppSizes.spacing24),
           ],
         ),
@@ -187,14 +185,27 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _notificationsView(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSizes.spacing12),
-      child: Row(
-        children: [
-          Expanded(child: BaseText(LocaleKeys.allow_notifications)),
-          Switcher(initialValue: false),
-        ],
-      ),
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) {
+        final isEnabled =
+            state is SettingsLoaded ? state.notificationsEnabled : false;
+
+        return Padding(
+          padding: const EdgeInsets.all(AppSizes.spacing12),
+          child: Row(
+            children: [
+              Expanded(child: BaseText(LocaleKeys.allow_notifications)),
+              Switcher(
+                // key нужен чтобы пересоздать Switcher при смене состояния
+                key: ValueKey(isEnabled),
+                initialValue: isEnabled,
+                onChanged: (value) =>
+                    context.read<SettingsCubit>().toggleNotifications(value),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

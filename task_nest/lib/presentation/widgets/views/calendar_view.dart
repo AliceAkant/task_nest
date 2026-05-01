@@ -16,6 +16,7 @@ class CalendarView extends StatefulWidget {
   late final DateTime lastDate;
   final Map<DateTime, int>? dayEventCountMap;
   final bool resetAvailable;
+  final bool showFooter;
   final SubmitCallback? onSubmit;
   final VoidCallback? onCancel;
   final VoidCallback? onReset;
@@ -28,6 +29,7 @@ class CalendarView extends StatefulWidget {
     DateTime? lastDate,
     this.dayEventCountMap,
     this.resetAvailable = true,
+    this.showFooter = true,
     this.onSubmit,
     this.onCancel,
     this.onReset,
@@ -136,12 +138,13 @@ class _CalendarViewState extends State<CalendarView> {
               widget.onDateChanged?.call(date);
             },
           ),
-          _CalendarFooter(
-            resetAvailable: widget.resetAvailable,
-            onCancel: widget.onCancel,
-            onReset: widget.onReset,
-            onSubmit: () => widget.onSubmit?.call(_selectedDate),
-          ),
+          if (widget.showFooter)
+            _CalendarFooter(
+              resetAvailable: widget.resetAvailable,
+              onCancel: widget.onCancel,
+              onReset: widget.onReset,
+              onSubmit: () => widget.onSubmit?.call(_selectedDate),
+            ),
         ],
       ),
     );

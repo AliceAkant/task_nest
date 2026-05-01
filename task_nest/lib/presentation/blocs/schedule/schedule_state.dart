@@ -1,6 +1,7 @@
 part of 'schedule_cubit.dart';
 
 class ScheduleState extends Equatable {
+  final ScheduleViewMode viewMode;
   final DateTime? selectedDate;
   final DateFilterMode dateFilterMode;
   final Member? selectedMember;
@@ -12,6 +13,7 @@ class ScheduleState extends Equatable {
   final String? error;
 
   const ScheduleState({
+    required this.viewMode,
     required this.selectedDate,
     required this.dateFilterMode,
     required this.selectedMember,
@@ -25,6 +27,7 @@ class ScheduleState extends Equatable {
 
   factory ScheduleState.initial({bool onlyMineDefault = false}) {
     return ScheduleState(
+      viewMode: ScheduleViewMode.day,
       selectedDate: null,
       dateFilterMode: DateFilterMode.main,
       selectedMember: null,
@@ -39,7 +42,10 @@ class ScheduleState extends Equatable {
     );
   }
 
+  // clearError: true явно сбрасывает ошибку.
+  // Без него error сохраняется, чтобы случайный copyWith не затирал её.
   ScheduleState copyWith({
+    ScheduleViewMode? viewMode,
     DateTime? selectedDate,
     DateFilterMode? dateFilterMode,
     Member? selectedMember,
@@ -49,10 +55,12 @@ class ScheduleState extends Equatable {
     bool? isLoading,
     bool? hasError,
     String? error,
+    bool clearError = false,
   }) {
     final mFilterMode = memberFilterMode ?? this.memberFilterMode;
     final dFilterMode = dateFilterMode ?? this.dateFilterMode;
     return ScheduleState(
+      viewMode: viewMode ?? this.viewMode,
       selectedDate: dFilterMode == DateFilterMode.dateFilter
           ? (selectedDate ?? this.selectedDate)
           : null,
@@ -65,12 +73,13 @@ class ScheduleState extends Equatable {
       filteredEvents: filteredEvents ?? this.filteredEvents,
       isLoading: isLoading ?? this.isLoading,
       hasError: hasError ?? this.hasError,
-      error: error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 
   @override
   List<Object?> get props => [
+    viewMode,
     selectedDate,
     dateFilterMode,
     selectedMember,

@@ -64,8 +64,13 @@ class _DatePickerState extends State<DatePicker> {
           backgroundColor: context.colors.background,
           child: CalendarView(
             initialDate: _selectedDate,
-            firstDate: widget.startDate ?? DateTime.now().dateOnly,
-            lastDate: DateTime(2100),
+            firstDate: widget.startDate ??
+                DateTime.now()
+                    .subtract(const Duration(days: 365))
+                    .dateOnly,
+            lastDate: DateTime.now()
+                .add(const Duration(days: 365))
+                .dateOnly,
             dayEventCountMap: widget.eventsCountMap,
             resetAvailable: widget.showResetButton,
             onSubmit: (date) => Navigator.pop(ctx, date),

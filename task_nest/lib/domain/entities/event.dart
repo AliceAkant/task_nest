@@ -1,19 +1,23 @@
+import 'package:equatable/equatable.dart';
 import 'package:task_nest/domain/entities/member.dart';
 
-class Event {
+class Event extends Equatable {
   final int? id;
   final String title;
   final DateTime dateTime;
   final Member? member;
   final String? notes;
 
-  Event({
+  const Event({
     required this.id,
     required this.title,
     required this.dateTime,
     required this.member,
     required this.notes,
   });
+
+  @override
+  List<Object?> get props => [id, title, dateTime, member, notes];
 
   @override
   String toString() {

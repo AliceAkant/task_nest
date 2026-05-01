@@ -73,6 +73,16 @@ class NotificationService {
     return false;
   }
 
+  Future<bool> checkPermissions() async {
+    final android = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    if (android != null) {
+      return await android.areNotificationsEnabled() ?? false;
+    }
+    // iOS не даёт проверить статус без запроса, считаем включёнными
+    return true;
+  }
+
   Future<void> scheduleEventReminders({
     required int eventId,
     required String eventTitle,
@@ -153,7 +163,7 @@ class NotificationService {
       title,
       body,
       tzDate,
-      const NotificationDetails(
+      NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
           _channelName,
@@ -163,11 +173,16 @@ class NotificationService {
           playSound: true,
           enableVibration: true,
           fullScreenIntent: false,
+          // Категория alarm позволяет пробиться через DND/тихий режим
+          category: AndroidNotificationCategory.alarm,
+          // BigTextStyle чтобы длинный body (с именем участника) не обрезался
+          styleInformation: BigTextStyleInformation(body),
         ),
-        iOS: DarwinNotificationDetails(
+        iOS: const DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
+          // timeSensitive пробивает Focus-режимы (iOS 15+), не требует entitlement
           interruptionLevel: InterruptionLevel.timeSensitive,
         ),
       ),

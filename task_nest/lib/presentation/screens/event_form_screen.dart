@@ -6,8 +6,6 @@ import 'package:task_nest/domain/entities/event.dart';
 import 'package:task_nest/domain/entities/member.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
-import 'package:task_nest/infrastructure/notifications/notification_service.dart';
-import 'package:task_nest/infrastructure/di/injection.dart';
 import 'package:task_nest/presentation/blocs/event_form/event_form_cubit.dart';
 import 'package:task_nest/presentation/blocs/event_form/event_form_state.dart';
 import 'package:task_nest/presentation/blocs/members/members_cubit.dart';
@@ -33,36 +31,51 @@ import 'package:task_nest/presentation/widgets/switcher.dart';
 import 'package:task_nest/presentation/widgets/text_input.dart';
 import 'package:task_nest/presentation/widgets/time_picker.dart';
 
-class EventFormScreen extends StatelessWidget {
+class EventFormScreen extends StatefulWidget {
   final FormMode mode;
   final Event? initialEvent;
   final DateTime? initialDate;
-  late final TextEditingController _titleController;
-  late final TextEditingController _noteController;
 
-  EventFormScreen({
+  const EventFormScreen({
     super.key,
     required this.mode,
     this.initialEvent,
     this.initialDate,
-  }) {
-    _titleController = TextEditingController(text: initialEvent?.title ?? '');
-    _noteController = TextEditingController(text: initialEvent?.notes ?? '');
-  }
+  });
 
-  EventFormScreen.add({super.key, this.initialDate})
+  const EventFormScreen.add({super.key, this.initialDate})
     : mode = FormMode.add,
-      initialEvent = null {
-    _titleController = TextEditingController();
-    _noteController = TextEditingController();
-  }
+      initialEvent = null;
 
-  EventFormScreen.edit({super.key, required Event event})
+  const EventFormScreen.edit({super.key, required Event event})
     : mode = FormMode.edit,
       initialEvent = event,
-      initialDate = null {
-    _titleController = TextEditingController(text: event.title);
-    _noteController = TextEditingController(text: event.notes);
+      initialDate = null;
+
+  @override
+  State<EventFormScreen> createState() => _EventFormScreenState();
+}
+
+class _EventFormScreenState extends State<EventFormScreen> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _noteController;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(
+      text: widget.initialEvent?.title ?? '',
+    );
+    _noteController = TextEditingController(
+      text: widget.initialEvent?.notes ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _noteController.dispose();
+    super.dispose();
   }
 
   Future _deleteEvent(BuildContext context) async {
@@ -71,11 +84,11 @@ class EventFormScreen extends StatelessWidget {
       style: PopupStyle.error,
       title: LocaleKeys.delete_event_popup_title,
       message: LocaleKeys.delete_event_popup_message,
-      submitText: LocaleKeys.cancel,
-      cancelText: LocaleKeys.delete,
+      submitText: LocaleKeys.delete,
+      cancelText: LocaleKeys.cancel,
       iconSource: AppSvg.attention,
     );
-    if (context.mounted && result == PopupResult.cancel) {
+    if (context.mounted && result == PopupResult.submit) {
       final cubit = context.read<EventFormCubit>();
       if (!cubit.state.isSaving) {
         cubit.delete();
@@ -86,8 +99,15 @@ class EventFormScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => EventFormCubit(mode, initialEvent, initialDate),
+      create: (_) => EventFormCubit(
+        widget.mode,
+        widget.initialEvent,
+        widget.initialDate,
+      ),
       child: BlocConsumer<EventFormCubit, EventFormState>(
+        listenWhen: (previous, next) =>
+            (previous.completed != true && next.completed == true) ||
+            (previous.hasError != true && next.hasError == true),
         listener: (context, state) {
           if (state.completed == true) {
             context.pop(true);
@@ -107,7 +127,7 @@ class EventFormScreen extends StatelessWidget {
             appBar: AppBarCreator.modal(
               context,
               isCloseDisabled: state.isSaving,
-              titleKey: mode == FormMode.add
+              titleKey: widget.mode == FormMode.add
                   ? LocaleKeys.add_event
                   : LocaleKeys.edit_event,
             ),
@@ -122,7 +142,7 @@ class EventFormScreen extends StatelessWidget {
                     TitleBlock(
                       titleKey: LocaleKeys.event_title,
                       child: TextInput(
-                        key: ValueKey('event_title_key'),
+                        key: const ValueKey('event_title_key'),
                         hintKey: LocaleKeys.event_title_example,
                         controller: _titleController,
                         isValid: !state.validationMode || state.isTitleValid,
@@ -180,7 +200,7 @@ class EventFormScreen extends StatelessWidget {
                     TitleBlock(
                       titleKey: LocaleKeys.notes,
                       child: TextInput(
-                        key: ValueKey('event_notes_key'),
+                        key: const ValueKey('event_notes_key'),
                         hintKey: LocaleKeys.notes_placeholder,
                         controller: _noteController,
                         maxLines: 4,
@@ -192,7 +212,7 @@ class EventFormScreen extends StatelessWidget {
                     // BUTTONS
                     const SizedBox(height: AppSizes.spacing24),
                     FormButtonsRow(
-                      mode: mode,
+                      mode: widget.mode,
                       addTextKey: LocaleKeys.add_event,
                       saveTextKey: LocaleKeys.save,
                       onSave: () => cubit.save(),
@@ -272,12 +292,7 @@ class EventFormScreen extends StatelessWidget {
         selectedReminders: state.reminders,
         isRussian: isRu,
         noReminderKey: LocaleKeys.no_reminder,
-        onToggled: (reminder) async {
-          if (!state.reminders.contains(reminder)) {
-            await DI.container<NotificationService>().requestPermissions();
-          }
-          cubit.reminderToggled(reminder);
-        },
+        onToggled: cubit.reminderToggled,
         onNoReminderSelected: cubit.clearReminders,
       ),
     );

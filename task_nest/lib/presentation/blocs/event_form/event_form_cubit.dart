@@ -17,6 +17,8 @@ class EventFormCubit extends FormCubit<EventFormState> {
   final DeleteEventUseCase _deleteEventUC;
   final NotificationService _notificationService;
 
+  bool _remindersLoaded = false;
+
   EventFormCubit(FormMode mode, Event? initialEvent, DateTime? initialDate)
     : _addEventUC = DI.container<AddEventUseCase>(),
       _editEventUC = DI.container<UpdateEventUseCase>(),
@@ -27,16 +29,19 @@ class EventFormCubit extends FormCubit<EventFormState> {
       ) {
     if (initialEvent?.id != null) {
       _loadReminders(initialEvent!.id!);
+    } else {
+      _remindersLoaded = true;
     }
   }
 
   Future<void> _loadReminders(int eventId) async {
     final reminders = await _notificationService.loadEventReminders(eventId);
+    _remindersLoaded = true;
     emit(state.copyWith(reminders: reminders));
   }
 
   ///
-  /// CHANGE HENDLERS
+  /// CHANGE HANDLERS
   ///
 
   void titleChanged(String title) =>
@@ -64,7 +69,11 @@ class EventFormCubit extends FormCubit<EventFormState> {
 
   void clearReminders() => emit(state.copyWith(reminders: {}));
 
-  void reminderToggled(ReminderOffset reminder) {
+  Future<void> reminderToggled(ReminderOffset reminder) async {
+    final isAdding = !state.reminders.contains(reminder);
+    if (isAdding) {
+      await _notificationService.requestPermissions();
+    }
     final current = Set<ReminderOffset>.from(state.reminders);
     if (current.contains(reminder)) {
       current.remove(reminder);
@@ -127,7 +136,9 @@ class EventFormCubit extends FormCubit<EventFormState> {
       processUseCaseResult<Event>(
         result,
         onSuccess: (updatedEvent) async {
-          await _scheduleReminders(state.eventId!, updatedEvent.title);
+          if (_remindersLoaded) {
+            await _scheduleReminders(state.eventId!, updatedEvent.title);
+          }
           emitComplete();
         },
       );
@@ -175,7 +186,7 @@ class EventFormCubit extends FormCubit<EventFormState> {
     if (endOfDay.difference(now).inHours < 2) {
       final roundedMinutes = ((now.minute + 9) ~/ 10) * 10;
       if (roundedMinutes >= 60) {
-        return now;
+        return DateTime(now.year, now.month, now.day, now.hour + 1, 0);
       }
       return DateTime(now.year, now.month, now.day, now.hour, roundedMinutes);
     }

@@ -37,7 +37,7 @@ class UserDto {
     return UserDto(
       name: json['name'] as String,
       avatarKey: json['avatarKey'] as String,
-      showOnlyUserEvents: json['showOnlyUserEvents'] as bool,
+      showOnlyUserEvents: json['showOnlyUserEvents'] as bool? ?? false,
     );
   }
 }

@@ -134,23 +134,20 @@ class EventsLocalDataSource {
 
     return DataSourceHelper.executeSafe(
       action: () async {
-        final dayExpr = db.events.timeDate;
-        final countExpr = db.events.timeDate.count();
-
+        // Fetch raw datetimes and group by date in Dart.
+        // SQL groupBy on timeDate would group by exact time, not just date.
         final query = db.selectOnly(db.events)
-          ..addColumns([dayExpr, countExpr])
-          ..where(db.events.timeDate.isBetweenValues(startDate, lastDate))
-          ..groupBy([dayExpr]);
+          ..addColumns([db.events.timeDate])
+          ..where(db.events.timeDate.isBetweenValues(startDate, lastDate));
 
         final rows = await query.get();
 
-        var resultMap = <DateTime, int>{};
-
+        final resultMap = <DateTime, int>{};
         for (final row in rows) {
-          final day = row.read(dayExpr);
-          final count = row.read(countExpr);
-          if (day != null && count != null) {
-            resultMap[day.dateOnly] = count;
+          final dt = row.read(db.events.timeDate);
+          if (dt != null) {
+            final key = dt.dateOnly;
+            resultMap[key] = (resultMap[key] ?? 0) + 1;
           }
         }
 

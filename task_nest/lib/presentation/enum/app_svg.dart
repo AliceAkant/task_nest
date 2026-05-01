@@ -8,6 +8,7 @@ enum AppSvg {
   dog('dog'),
   duck('duck'),
   giraffe('giraffe'),
+  grid('grid'),
   hamster('hamster'),
   heart('heart'),
   moon('moon'),

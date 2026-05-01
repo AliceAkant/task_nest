@@ -16,9 +16,11 @@ class EventsCountCubit extends Cubit<EventsCountState> {
   Future loadData() async {
     emit(Loading());
 
-    final startDate = DateTime.now().dateOnly;
+    final startDate = DateTime.now()
+        .subtract(const Duration(days: 365))
+        .dateOnly;
 
-    final result = await _getCountUC.call(startDate, 3);
+    final result = await _getCountUC.call(startDate, 24);
 
     result.fold(
       (failure) => emit(LoadError()),

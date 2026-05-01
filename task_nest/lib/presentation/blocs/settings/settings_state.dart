@@ -8,3 +8,12 @@ abstract class SettingsState extends Equatable {
 }
 
 class SettingsInitial extends SettingsState {}
+
+class SettingsLoaded extends SettingsState {
+  final bool notificationsEnabled;
+
+  const SettingsLoaded({required this.notificationsEnabled});
+
+  @override
+  List<Object?> get props => [notificationsEnabled];
+}

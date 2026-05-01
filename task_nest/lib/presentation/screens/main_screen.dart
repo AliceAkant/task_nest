@@ -12,10 +12,15 @@ import 'package:task_nest/presentation/screens/schedule_screen.dart';
 import 'package:task_nest/presentation/screens/settings_screen.dart';
 import 'package:task_nest/presentation/widgets/views/bottom_nav_bar_view.dart';
 
-class MainScreen extends StatelessWidget {
-  final PageController _pageController = PageController();
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
-  MainScreen({super.key});
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  late final PageController _pageController;
 
   final List<TabItem> tabs = [
     TabItem(
@@ -31,6 +36,18 @@ class MainScreen extends StatelessWidget {
       SettingsScreen(key: PageStorageKey('settings')),
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
