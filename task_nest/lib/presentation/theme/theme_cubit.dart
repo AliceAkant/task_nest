@@ -11,16 +11,24 @@ class ThemeCubit extends Cubit<ThemeMode> {
   ThemeCubit(super.initialMode)
     : _setThemeMode = DI.container<SetThemeModeUseCase>();
 
+  void setMode(ThemeMode newTheme) => _apply(newTheme);
+
   void toggleLight() => _apply(ThemeMode.light);
 
   void toggleDark() => _apply(ThemeMode.dark);
+
+  void toggleSystem() => _apply(ThemeMode.system);
 
   void _apply(ThemeMode newTheme) {
     if (state == newTheme) return;
     ThemeHelper.changeNativeBarColors(newTheme);
     emit(newTheme);
-    _setThemeMode.call(
-      newTheme == ThemeMode.dark ? AppThemeMode.dark : AppThemeMode.light,
-    );
+    _setThemeMode.call(_toAppThemeMode(newTheme));
   }
+
+  AppThemeMode _toAppThemeMode(ThemeMode mode) => switch (mode) {
+    ThemeMode.dark => AppThemeMode.dark,
+    ThemeMode.light => AppThemeMode.light,
+    ThemeMode.system => AppThemeMode.system,
+  };
 }

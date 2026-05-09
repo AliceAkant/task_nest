@@ -1,3 +1,4 @@
+import 'package:task_nest/domain/entities/daily_brief_settings.dart';
 import 'package:task_nest/domain/enums/app_theme_mode.dart';
 import 'package:task_nest/domain/repositories/app_preferences_repository.dart';
 
@@ -31,4 +32,21 @@ class SetLocaleKeyUseCase {
   SetLocaleKeyUseCase(this.repository);
 
   Future<void> call(String localeKey) => repository.setLocaleKey(localeKey);
+}
+
+class GetDailyBriefSettingsUseCase {
+  final AppPreferencesRepository repository;
+
+  GetDailyBriefSettingsUseCase(this.repository);
+
+  Future<DailyBriefSettings> call() => repository.getDailyBriefSettings();
+}
+
+class SetDailyBriefSettingsUseCase {
+  final AppPreferencesRepository repository;
+
+  SetDailyBriefSettingsUseCase(this.repository);
+
+  Future<void> call(DailyBriefSettings settings) =>
+      repository.setDailyBriefSettings(settings);
 }

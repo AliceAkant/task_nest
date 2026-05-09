@@ -28,6 +28,7 @@ import 'package:task_nest/presentation/widgets/title_block.dart';
 import 'package:task_nest/presentation/widgets/member_drop_down.dart';
 import 'package:task_nest/presentation/widgets/reminder_dropdown.dart';
 import 'package:task_nest/presentation/widgets/switcher.dart';
+import 'package:task_nest/presentation/widgets/tappable_box.dart';
 import 'package:task_nest/presentation/widgets/text_input.dart';
 import 'package:task_nest/presentation/widgets/time_picker.dart';
 
@@ -199,6 +200,14 @@ class _EventFormScreenState extends State<EventFormScreen>
                         ],
                       ),
                     ),
+
+                    // CONFLICTS
+                    _conflictsView(context, state),
+
+                    const SizedBox(height: AppSizes.spacing16),
+
+                    // DURATION
+                    _durationView(context, state, cubit),
                     const SizedBox(height: AppSizes.spacing16),
 
                     // REMINDERS
@@ -290,6 +299,109 @@ class _EventFormScreenState extends State<EventFormScreen>
         );
       },
     );
+  }
+
+  Widget _conflictsView(BuildContext context, EventFormState state) {
+    if (state.conflicts.isEmpty) return const SizedBox.shrink();
+
+    final isRu = context.locale.languageCode == 'ru';
+    final list = state.conflicts.map((ev) {
+      final hh = ev.dateTime.hour.toString().padLeft(2, '0');
+      final mm = ev.dateTime.minute.toString().padLeft(2, '0');
+      final memberPart = ev.member?.name;
+      final main = '$hh:$mm ${ev.title}';
+      return memberPart != null ? '$memberPart — $main' : main;
+    }).join(isRu ? ', ' : ', ');
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSizes.spacing8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: AppSizes.size18,
+            color: context.colors.labelSecondary,
+          ),
+          const SizedBox(width: AppSizes.spacing4),
+          Expanded(
+            child: BaseText(
+              context.tr(
+                LocaleKeys.conflicts_with,
+                namedArgs: {'events': list},
+              ),
+              localized: false,
+              fontSize: TypographyConst.labelMedium,
+              color: context.colors.labelSecondary,
+              maxLines: 4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static const List<int> _durationPresetsMin = [15, 30, 45, 60, 90, 120, 180];
+
+  Widget _durationView(
+    BuildContext context,
+    EventFormState state,
+    EventFormCubit cubit,
+  ) {
+    final isRu = context.locale.languageCode == 'ru';
+    return TitleBlock(
+      titleKey: LocaleKeys.duration,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: _durationPresetsMin.map((minutes) {
+            final value = Duration(minutes: minutes);
+            final selected = state.duration == value;
+            return Padding(
+              padding: const EdgeInsets.only(right: AppSizes.spacing8),
+              child: TappableBox(
+                onTap: () => cubit.durationChanged(value),
+                backgroundColor: selected
+                    ? context.colors.lightPurple40
+                    : Colors.transparent,
+                splashColor: context.colors.defaultSplash,
+                borderRadius: BorderRadius.circular(AppSizes.barRadius),
+                border: Border.all(
+                  width: AppSizes.border1,
+                  color: selected
+                      ? context.colors.borderFocused
+                      : context.colors.borderSecondary,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSizes.spacing8,
+                    horizontal: AppSizes.spacing12,
+                  ),
+                  child: BaseText(
+                    _formatDuration(minutes, isRu),
+                    localized: false,
+                    fontWeight: TypographyConst.wSemiBold,
+                    fontSize: TypographyConst.labelMedium,
+                    color: selected
+                        ? context.colors.purple
+                        : context.colors.labelSecondary,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  String _formatDuration(int minutes, bool isRu) {
+    if (minutes < 60) return isRu ? '$minutes мин' : '$minutes min';
+    final hours = minutes / 60;
+    final label = hours == hours.toInt()
+        ? hours.toInt().toString()
+        : hours.toString();
+    return isRu ? '$label ч' : '${label}h';
   }
 
   Widget _remindersView(

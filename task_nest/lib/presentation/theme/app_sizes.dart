@@ -39,7 +39,7 @@ class AppSizes {
   static const double border3 = 3.0;
 
   // Custom
-  static const double pageHGap = 12.0;
+  static const double pageHGap = 16.0;
   static const double inputHGap = 12.0;
   static const double inputHeight = 48.0;
   static const double buttonHeight = 48.0;

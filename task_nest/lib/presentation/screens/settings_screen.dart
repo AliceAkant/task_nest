@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_nest/core/shared_prefs/shared_preferences_extension.dart';
 import 'package:task_nest/core/shared_prefs/shared_preferences_factory.dart';
+import 'package:task_nest/domain/entities/daily_brief_settings.dart';
 import 'package:task_nest/domain/entities/user_profile.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
 import 'package:task_nest/infrastructure/localization/localization_config.dart';
@@ -51,7 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
-      context.read<SettingsCubit>().refreshPermissionState();
+      context.read<SettingsCubit>().refreshState();
     }
   }
 
@@ -212,24 +213,119 @@ class _SettingsScreenState extends State<SettingsScreen>
   Widget _notificationsView(BuildContext context) {
     return BlocBuilder<SettingsCubit, SettingsState>(
       builder: (context, state) {
-        final isEnabled =
-            state is SettingsLoaded ? state.notificationsEnabled : false;
+        final loaded = state is SettingsLoaded ? state : null;
+        final isEnabled = loaded?.notificationsEnabled ?? false;
+        final brief = loaded?.dailyBrief ?? const DailyBriefSettings.defaults();
 
-        return Padding(
-          padding: const EdgeInsets.all(AppSizes.spacing12),
-          child: Row(
-            children: [
-              Expanded(child: BaseText(LocaleKeys.allow_notifications)),
-              Switcher(
-                value: isEnabled,
-                onChanged: (value) =>
-                    context.read<SettingsCubit>().toggleNotifications(value),
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSizes.spacing12),
+              child: Row(
+                children: [
+                  Expanded(child: BaseText(LocaleKeys.allow_notifications)),
+                  Switcher(
+                    value: isEnabled,
+                    onChanged: (value) =>
+                        context.read<SettingsCubit>().toggleNotifications(value),
+                  ),
+                ],
               ),
+            ),
+            if (isEnabled) ...[
+              _separator(context),
+              _dailyBriefView(context, brief),
             ],
-          ),
+          ],
         );
       },
     );
+  }
+
+  Widget _dailyBriefView(BuildContext context, DailyBriefSettings brief) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSizes.spacing12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BaseText(
+                      LocaleKeys.daily_brief,
+                      fontWeight: TypographyConst.wSemiBold,
+                    ),
+                    const SizedBox(height: AppSizes.spacing2),
+                    BaseText(
+                      LocaleKeys.daily_brief_description,
+                      fontSize: TypographyConst.labelMedium,
+                      color: context.colors.labelSecondary,
+                    ),
+                  ],
+                ),
+              ),
+              Switcher(
+                value: brief.enabled,
+                onChanged: (value) =>
+                    context.read<SettingsCubit>().toggleDailyBrief(value),
+              ),
+            ],
+          ),
+          if (brief.enabled) ...[
+            const SizedBox(height: AppSizes.spacing12),
+            Row(
+              children: [
+                Expanded(child: BaseText(LocaleKeys.daily_brief_time)),
+                TappableBox(
+                  onTap: () => _pickDailyBriefTime(context, brief),
+                  backgroundColor: context.colors.lightPurple40,
+                  splashColor: context.colors.defaultSplash,
+                  borderRadius: BorderRadius.circular(AppSizes.barRadius),
+                  border: Border.all(
+                    width: AppSizes.border1,
+                    color: context.colors.borderFocused,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSizes.spacing8,
+                      horizontal: AppSizes.spacing12,
+                    ),
+                    child: BaseText(
+                      _formatTime(brief.hour, brief.minute),
+                      localized: false,
+                      fontWeight: TypographyConst.wSemiBold,
+                      color: context.colors.purple,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickDailyBriefTime(
+    BuildContext context,
+    DailyBriefSettings brief,
+  ) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: brief.hour, minute: brief.minute),
+    );
+    if (picked != null && context.mounted) {
+      context.read<SettingsCubit>().setDailyBriefTime(picked.hour, picked.minute);
+    }
+  }
+
+  String _formatTime(int hour, int minute) {
+    final hh = hour.toString().padLeft(2, '0');
+    final mm = minute.toString().padLeft(2, '0');
+    return '$hh:$mm';
   }
 
   Widget _separator(BuildContext context) {
@@ -240,22 +336,79 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Widget _theme(BuildContext context) {
-    return Column(
-      children: [
-        CheckableItem(
-          textKey: LocaleKeys.dark_theme,
-          icon: AppSvg.moon,
-          isSelected: context.read<ThemeCubit>().state == ThemeMode.dark,
-          onTap: () => context.read<ThemeCubit>().toggleDark(),
+    return BlocBuilder<ThemeCubit, ThemeMode>(
+      builder: (context, mode) {
+        return Padding(
+          padding: const EdgeInsets.all(AppSizes.spacing8),
+          child: Row(
+            children: [
+              _themeSegment(
+                context,
+                textKey: LocaleKeys.system,
+                isSelected: mode == ThemeMode.system,
+                onTap: () => context.read<ThemeCubit>().toggleSystem(),
+              ),
+              _themeSegment(
+                context,
+                textKey: LocaleKeys.light,
+                icon: AppSvg.sun,
+                isSelected: mode == ThemeMode.light,
+                onTap: () => context.read<ThemeCubit>().toggleLight(),
+              ),
+              _themeSegment(
+                context,
+                textKey: LocaleKeys.dark,
+                icon: AppSvg.moon,
+                isSelected: mode == ThemeMode.dark,
+                onTap: () => context.read<ThemeCubit>().toggleDark(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _themeSegment(
+    BuildContext context, {
+    required String textKey,
+    AppSvg? icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final fg = isSelected ? context.colors.purple : context.colors.labelSecondary;
+    return Expanded(
+      child: TappableBox(
+        onTap: onTap,
+        backgroundColor:
+            isSelected ? context.colors.lightPurple40 : Colors.transparent,
+        splashColor: context.colors.defaultSplash,
+        borderRadius: BorderRadius.circular(AppSizes.barRadius),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSizes.spacing12,
+            horizontal: AppSizes.spacing8,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon != null) ...[
+                AssetsHelper.getSvgImage(
+                  icon,
+                  width: AppSizes.size18,
+                ),
+                const SizedBox(width: AppSizes.spacing4),
+              ],
+              BaseText(
+                textKey,
+                color: fg,
+                fontWeight: TypographyConst.wSemiBold,
+                fontSize: TypographyConst.labelMedium,
+              ),
+            ],
+          ),
         ),
-        _separator(context),
-        CheckableItem(
-          textKey: LocaleKeys.light_theme,
-          icon: AppSvg.sun,
-          isSelected: context.read<ThemeCubit>().state == ThemeMode.light,
-          onTap: () => context.read<ThemeCubit>().toggleLight(),
-        ),
-      ],
+      ),
     );
   }
 

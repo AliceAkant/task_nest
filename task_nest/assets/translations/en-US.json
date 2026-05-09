@@ -40,6 +40,7 @@
   "select_member": "Select member",
   "event_title": "Event title",
   "date_time": "Date & Time",
+  "duration": "Duration",
   "assign_member": "Assign Member",
   "member_name": "Member name",
   "schedule_color": "Schedule color",
@@ -99,5 +100,14 @@
   "error_snack_message": "Please try again.",
   "remind_me": "Remind me",
   "no_reminder": "Don't remind",
-  "notification_scheduled_at": "Scheduled at {time}"
+  "notification_scheduled_at": "Scheduled at {time}",
+  "daily_brief": "Daily brief",
+  "daily_brief_description": "A morning push with today's events",
+  "daily_brief_time": "Time",
+  "daily_brief_title_today": "Today's plan",
+  "daily_brief_title_tomorrow": "Tomorrow's plan",
+  "daily_brief_body_empty": "No events planned. Enjoy the day!",
+  "daily_brief_body_count": "{count} event(s):",
+  "daily_brief_event_line": "{time} — {title}",
+  "conflicts_with": "Overlaps with: {events}"
 }

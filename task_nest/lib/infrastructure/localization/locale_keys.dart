@@ -43,6 +43,7 @@ class LocaleKeys {
   static const select_member = 'select_member';
   static const event_title = 'event_title';
   static const date_time = 'date_time';
+  static const duration = 'duration';
   static const assign_member = 'assign_member';
   static const member_name = 'member_name';
   static const schedule_color = 'schedule_color';
@@ -91,4 +92,17 @@ class LocaleKeys {
   static const remind_me = 'remind_me';
   static const no_reminder = 'no_reminder';
   static const notification_scheduled_at = 'notification_scheduled_at';
+
+  // Daily brief
+  static const daily_brief = 'daily_brief';
+  static const daily_brief_description = 'daily_brief_description';
+  static const daily_brief_time = 'daily_brief_time';
+  static const daily_brief_title_today = 'daily_brief_title_today';
+  static const daily_brief_title_tomorrow = 'daily_brief_title_tomorrow';
+  static const daily_brief_body_empty = 'daily_brief_body_empty';
+  static const daily_brief_body_count = 'daily_brief_body_count';
+  static const daily_brief_event_line = 'daily_brief_event_line';
+
+  // Conflicts
+  static const conflicts_with = 'conflicts_with';
 }

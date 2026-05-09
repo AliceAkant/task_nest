@@ -159,5 +159,18 @@ class DI {
     container.registerFactory(
       () => SetLocaleKeyUseCase(container<AppPreferencesRepository>()),
     );
+    container.registerFactory(
+      () => GetDailyBriefSettingsUseCase(container<AppPreferencesRepository>()),
+    );
+    container.registerFactory(
+      () => SetDailyBriefSettingsUseCase(container<AppPreferencesRepository>()),
+    );
+    container.registerFactory(
+      () => RescheduleDailyBriefUseCase(
+        container<NotificationsRepository>(),
+        container<AppPreferencesRepository>(),
+        container<EventsRepository>(),
+      ),
+    );
   }
 }

@@ -49,6 +49,7 @@ class FiltersView extends StatelessWidget {
                     ? LocaleKeys.all_members
                     : LocaleKeys.only_mine,
                 resetAvailable: false,
+                accent: false,
               ),
 
             if (memberFilter != null)
@@ -140,18 +141,24 @@ class FiltersView extends StatelessWidget {
     BuildContext context, {
     required String title,
     bool resetAvailable = true,
+    bool accent = true,
     Function()? onTap,
   }) {
+    final fgColor = accent ? context.colors.purple : context.colors.labelSecondary;
+    final bgColor = accent ? context.colors.lightPurple40 : Colors.transparent;
+    final borderColor =
+        accent ? context.colors.borderFocused : context.colors.borderSecondary;
+
     return Padding(
       padding: EdgeInsets.only(right: AppSizes.spacing8),
       child: TappableBox(
         onTap: () => onTap?.call(),
-        backgroundColor: context.colors.lightPurple40,
+        backgroundColor: bgColor,
         splashColor: context.colors.defaultSplash,
         borderRadius: BorderRadius.circular(AppSizes.barRadius),
         border: Border.all(
           width: AppSizes.border1,
-          color: context.colors.borderFocused,
+          color: borderColor,
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: AppSizes.spacing8),
@@ -165,7 +172,7 @@ class FiltersView extends StatelessWidget {
                 title.truncate(),
                 fontWeight: TypographyConst.wSemiBold,
                 fontSize: TypographyConst.labelMedium,
-                color: context.colors.purple,
+                color: fgColor,
               ),
               if (resetAvailable)
                 Padding(
@@ -173,7 +180,7 @@ class FiltersView extends StatelessWidget {
                   child: Icon(
                     Icons.close,
                     size: AppSizes.size20,
-                    color: context.colors.purple,
+                    color: fgColor,
                   ),
                 ),
               const SizedBox(width: AppSizes.spacing8),

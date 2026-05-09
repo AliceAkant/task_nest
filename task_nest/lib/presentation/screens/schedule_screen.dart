@@ -257,7 +257,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.only(
-              bottom: _addButtonSize + AppSizes.spacing8,
+              bottom: _addButtonSize + AppSizes.spacing16,
             ),
             child: _eventsGroup(
               context,
@@ -366,7 +366,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
         return SingleChildScrollView(
           padding: EdgeInsets.only(
-            bottom: _addButtonSize + AppSizes.spacing8,
+            bottom: _addButtonSize + AppSizes.spacing16,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -426,7 +426,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       itemCount: entries.length,
       padding: EdgeInsets.only(
         top: AppSizes.spacing4,
-        bottom: _addButtonSize + AppSizes.spacing8,
+        bottom: _addButtonSize + AppSizes.spacing16,
       ),
       itemBuilder: (context, index) {
         final entry = entries[index];

@@ -1,5 +1,6 @@
 import 'package:task_nest/domain/entities/event.dart';
 import 'package:task_nest/domain/entities/member.dart';
+
 import 'package:task_nest/domain/enums/reminder_offset.dart';
 import 'package:task_nest/presentation/blocs/base_form/base_form_state.dart';
 import 'package:task_nest/presentation/enum/form_mode.dart';
@@ -11,6 +12,7 @@ class EventFormState extends BaseFormState {
   final String title;
   final String note;
   final DateTime date;
+  final Duration duration;
   final bool assignToMe;
   final Member? assignedMember;
   final bool validationMode;
@@ -18,6 +20,7 @@ class EventFormState extends BaseFormState {
   final Set<ReminderOffset> reminders;
   final bool osPermissionGranted;
   final bool notificationsMuted;
+  final List<Event> conflicts;
 
   const EventFormState({
     required this.mode,
@@ -25,6 +28,7 @@ class EventFormState extends BaseFormState {
     required this.title,
     required this.note,
     required this.date,
+    required this.duration,
     required this.assignToMe,
     required this.assignedMember,
     required this.validationMode,
@@ -32,6 +36,7 @@ class EventFormState extends BaseFormState {
     required this.reminders,
     required this.osPermissionGranted,
     required this.notificationsMuted,
+    required this.conflicts,
 
     required super.isSaving,
     required super.hasError,
@@ -53,6 +58,7 @@ class EventFormState extends BaseFormState {
           initialEvent?.dateTime ??
           initialDate ??
           DateTime.now().dateOnly.add(Duration(hours: 12)),
+      duration: initialEvent?.duration ?? Event.defaultDuration,
       assignToMe: initialEvent?.member == null,
       assignedMember: initialEvent?.member,
       validationMode: false,
@@ -60,6 +66,7 @@ class EventFormState extends BaseFormState {
       reminders: const {},
       osPermissionGranted: false,
       notificationsMuted: false,
+      conflicts: const [],
       isSaving: false,
       hasError: false,
       completed: false,
@@ -72,6 +79,7 @@ class EventFormState extends BaseFormState {
     String? title,
     String? note,
     DateTime? date,
+    Duration? duration,
     bool? assignToMe,
     Member? assignedMember,
     bool? validationMode,
@@ -79,6 +87,7 @@ class EventFormState extends BaseFormState {
     Set<ReminderOffset>? reminders,
     bool? osPermissionGranted,
     bool? notificationsMuted,
+    List<Event>? conflicts,
 
     bool? isSaving,
     bool? hasError,
@@ -91,6 +100,7 @@ class EventFormState extends BaseFormState {
       title: title ?? this.title,
       note: note ?? this.note,
       date: date ?? this.date,
+      duration: duration ?? this.duration,
       assignToMe: assignToMe ?? this.assignToMe,
       assignedMember: (assignToMe ?? this.assignToMe)
           ? null
@@ -101,6 +111,7 @@ class EventFormState extends BaseFormState {
       osPermissionGranted:
           osPermissionGranted ?? this.osPermissionGranted,
       notificationsMuted: notificationsMuted ?? this.notificationsMuted,
+      conflicts: conflicts ?? this.conflicts,
 
       isSaving: isSaving ?? this.isSaving,
       completed: completed ?? this.completed,
@@ -116,6 +127,7 @@ class EventFormState extends BaseFormState {
     title,
     note,
     date,
+    duration,
     assignToMe,
     assignedMember,
     validationMode,
@@ -123,6 +135,7 @@ class EventFormState extends BaseFormState {
     reminders,
     osPermissionGranted,
     notificationsMuted,
+    conflicts,
     isSaving,
     hasError,
     completed,

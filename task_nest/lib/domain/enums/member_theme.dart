@@ -25,7 +25,7 @@ const Color SCHEDULE_BG_PEACH = Color(0xFF4B3A2C);
 const Color SCHEDULE_BG_SKY = Color(0xFF2C3D4B);
 const Color SCHEDULE_BG_LILAC = Color(0xFF3D2C4B);
 const Color SCHEDULE_BG_LEMON = Color(0xFF4B4B2C);
-const Color SCHEDULE_BG_NONE = Color(0xFF1E293B);
+const Color SCHEDULE_BG_NONE = Color(0xFF1E1E22);
 
 enum MemberTheme { none, rose, mint, peach, sky, lilac, lemon }
 
@@ -49,8 +49,8 @@ extension MemberThemeExtension on MemberTheme {
     }
   }
 
-  Color scheduleBG(ThemeMode theme) {
-    if (theme == ThemeMode.dark) {
+  Color scheduleBG(Brightness brightness) {
+    if (brightness == Brightness.dark) {
       switch (this) {
         case MemberTheme.rose:
           return SCHEDULE_BG_ROSE;

@@ -26,4 +26,16 @@ abstract class NotificationsRepository {
   Future<void> saveEventReminders(int eventId, Set<ReminderOffset> reminders);
 
   Future<void> clearEventReminders(int eventId);
+
+  /// Schedule a one-shot daily-brief notification for a given date+time.
+  /// `dayId` should be unique per day to allow individual cancellation.
+  Future<void> scheduleDailyBrief({
+    required int dayId,
+    required DateTime scheduledAt,
+    required String title,
+    required String body,
+  });
+
+  /// Cancels all daily-brief notifications previously scheduled.
+  Future<void> cancelAllDailyBriefs();
 }

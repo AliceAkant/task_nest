@@ -23,9 +23,11 @@ void main() async {
   SvgCacheManager.precacheAppSvgList();
 
   final appThemeMode = await DI.container<GetThemeModeUseCase>().call();
-  final themeMode = appThemeMode == AppThemeMode.dark
-      ? ThemeMode.dark
-      : ThemeMode.light;
+  final themeMode = switch (appThemeMode) {
+    AppThemeMode.dark => ThemeMode.dark,
+    AppThemeMode.light => ThemeMode.light,
+    AppThemeMode.system => ThemeMode.system,
+  };
 
   final savedLocaleKey = await DI.container<GetLocaleKeyUseCase>().call();
   final startLocale =

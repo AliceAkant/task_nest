@@ -108,6 +108,7 @@ class EventsLocalDataSource {
         final model = EventsCompanion.insert(
           title: event.title,
           timeDate: event.timeDate,
+          durationMinutes: Value(event.durationMinutes),
           notes: Value(event.notes),
           memberId: Value(event.member?.id),
         );
@@ -126,6 +127,7 @@ class EventsLocalDataSource {
         final model = EventsCompanion(
           title: Value(event.title),
           timeDate: Value(event.timeDate),
+          durationMinutes: Value(event.durationMinutes),
           notes: Value(event.notes),
           memberId: Value(event.member?.id),
         );
@@ -163,6 +165,7 @@ class EventsLocalDataSource {
       id: row.id,
       title: row.title,
       timeDate: row.timeDate,
+      durationMinutes: row.durationMinutes,
       notes: row.notes,
       member: linkedMember != null
           ? MemberDriftDto(

@@ -5,6 +5,7 @@ class EventDriftDto {
   final int id;
   final String title;
   final DateTime timeDate;
+  final int durationMinutes;
   final String? notes;
   final MemberDriftDto? member;
 
@@ -12,6 +13,7 @@ class EventDriftDto {
     required this.id,
     required this.title,
     required this.timeDate,
+    required this.durationMinutes,
     required this.notes,
     this.member,
   });
@@ -20,6 +22,7 @@ class EventDriftDto {
     int? id,
     String? title,
     DateTime? timeDate,
+    int? durationMinutes,
     String? notes,
     MemberDriftDto? member,
   }) {
@@ -27,6 +30,7 @@ class EventDriftDto {
       id: id ?? this.id,
       title: title ?? this.title,
       timeDate: timeDate ?? this.timeDate,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
       notes: notes ?? this.notes,
       member: member ?? this.member,
     );
@@ -36,6 +40,7 @@ class EventDriftDto {
     id: id,
     title: title,
     dateTime: timeDate,
+    duration: Duration(minutes: durationMinutes),
     member: member?.toEntity(),
     notes: notes,
   );
@@ -45,6 +50,7 @@ class EventDriftDto {
       id: event.id ?? 0, // autoincrement
       title: event.title,
       timeDate: event.dateTime,
+      durationMinutes: event.duration.inMinutes,
       notes: event.notes,
       member: event.member != null
           ? MemberDriftDto.fromEntity(event.member!)

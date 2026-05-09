@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 const Color DEFAULT_BG_COLOR_LIGHT = Colors.white;
-const Color DEFAULT_BG_COLOR_DARK = Color(0xFF0F172A);
+const Color DEFAULT_BG_COLOR_DARK = Color(0xFF121212);
 
 class AppColors extends ThemeExtension<AppColors> {
   static Color getDefaultBGColor(ThemeMode mode) =>
@@ -178,27 +178,27 @@ class AppColors extends ThemeExtension<AppColors> {
 
   static const dark = AppColors(
     background: DEFAULT_BG_COLOR_DARK,
-    purple: Color(0xFF636AE8),
-    lightPurple40: Color(0x28636AE8),
-    lightGrey: Color(0xFF94A3B8),
-    lightGrey150: Color(0x6094A3B8),
-    error: Color(0xFFEF4444),
-    success: Color(0xFF10B981),
-    disable: Color(0xFF27272A),
-    labelPrimary: Color(0xFFF1F5F9),
-    labelSecondary: Color(0xFF94A3B8),
+    purple: Color(0xFF8B91FF),
+    lightPurple40: Color(0x338B91FF),
+    lightGrey: Color(0xFFA0A0A8),
+    lightGrey150: Color(0x60A0A0A8),
+    error: Color(0xFFF87171),
+    success: Color(0xFF34D399),
+    disable: Color(0xFF2A2A2F),
+    labelPrimary: Color(0xFFECEDEE),
+    labelSecondary: Color(0xFFA0A0A8),
     labelDisable: Color(0xFF6B7280),
-    labelHint: Color(0xFF94A3B8),
+    labelHint: Color(0xFF6E6E76),
     buttonText: Color(0xFFFFFFFF),
-    buttonPrimary: Color(0xFF636AE8),
-    buttonDisabled: Color(0xFF27272A),
-    borderPrimary: Color(0xFF334155),
-    borderFocused: Color(0xFF636AE8),
-    borderError: Color(0xFFEF4444),
-    borderDisabled: Color(0xFF27272A),
-    borderSecondary: Color(0x6094A3B8),
-    defaultSplash: Color(0x6094A3B8),
-    redSplash: Color(0x50EF4444),
-    defaultShadow: Color(0x6094A3B8),
+    buttonPrimary: Color(0xFF8B91FF),
+    buttonDisabled: Color(0xFF2A2A2F),
+    borderPrimary: Color(0xFF3A3A40),
+    borderFocused: Color(0xFF8B91FF),
+    borderError: Color(0xFFF87171),
+    borderDisabled: Color(0xFF2A2A2F),
+    borderSecondary: Color(0x60A0A0A8),
+    defaultSplash: Color(0x60A0A0A8),
+    redSplash: Color(0x50F87171),
+    defaultShadow: Color(0x80000000),
   );
 }

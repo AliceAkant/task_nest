@@ -11,6 +11,8 @@ class Events extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
   DateTimeColumn get timeDate => dateTime()();
+  IntColumn get durationMinutes =>
+      integer().withDefault(const Constant(30))();
   TextColumn get notes => text().nullable()();
 
   // nullable foreign key on Member

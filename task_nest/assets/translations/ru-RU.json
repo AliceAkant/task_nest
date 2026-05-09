@@ -40,6 +40,7 @@
   "select_member": "Выбрать участника",
   "event_title": "Название события",
   "date_time": "Дата и время",
+  "duration": "Длительность",
   "assign_member": "Назначить участника",
   "member_name": "Имя участника",
   "schedule_color": "Цвет расписания",
@@ -99,5 +100,14 @@
   "error_snack_message": "Попробуйте ещё раз",
   "remind_me": "Напомнить",
   "no_reminder": "Не напоминать",
-  "notification_scheduled_at": "Запланировано в {time}"
+  "notification_scheduled_at": "Запланировано в {time}",
+  "daily_brief": "Утренний дайджест",
+  "daily_brief_description": "Утренний пуш с событиями дня",
+  "daily_brief_time": "Время",
+  "daily_brief_title_today": "План на сегодня",
+  "daily_brief_title_tomorrow": "План на завтра",
+  "daily_brief_body_empty": "Событий не запланировано. Хорошего дня!",
+  "daily_brief_body_count": "{count} событ.:",
+  "daily_brief_event_line": "{time} — {title}",
+  "conflicts_with": "Пересекается с: {events}"
 }

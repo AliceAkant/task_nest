@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:task_nest/domain/entities/event.dart';
 import 'package:task_nest/domain/entities/member.dart';
 import 'package:task_nest/domain/enums/reminder_offset.dart';
@@ -19,6 +21,8 @@ class EventFormCubit extends FormCubit<EventFormState> {
   final GetNotificationsStateUseCase _getNotificationsStateUC;
   final SetNotificationsMutedUseCase _setMutedUC;
   final OpenNotificationSettingsUseCase _openSettingsUC;
+  final RescheduleDailyBriefUseCase _rescheduleDailyBriefUC;
+  final GetEventsBetweenDateUseCase _getEventsBetweenUC;
 
   Future<void>? _remindersLoading;
 
@@ -33,6 +37,8 @@ class EventFormCubit extends FormCubit<EventFormState> {
           DI.container<GetNotificationsStateUseCase>(),
       _setMutedUC = DI.container<SetNotificationsMutedUseCase>(),
       _openSettingsUC = DI.container<OpenNotificationSettingsUseCase>(),
+      _rescheduleDailyBriefUC = DI.container<RescheduleDailyBriefUseCase>(),
+      _getEventsBetweenUC = DI.container<GetEventsBetweenDateUseCase>(),
       super(
         EventFormState.initial(mode, initialEvent, _getCustomTime(initialDate)),
       ) {
@@ -40,6 +46,7 @@ class EventFormCubit extends FormCubit<EventFormState> {
       _remindersLoading = _loadReminders(initialEvent!.id!);
     }
     refreshPermission();
+    _refreshConflicts();
   }
 
   Future<void> _loadReminders(int eventId) async {
@@ -72,19 +79,30 @@ class EventFormCubit extends FormCubit<EventFormState> {
   void assignToMeChanged(bool assignToMe) =>
       emit(state.copyWith(assignToMe: assignToMe));
 
-  void dateChanged(int year, int month, int day) => emit(
-    state.copyWith(
-      date: state.date.copyWith(year: year, month: month, day: day),
-    ),
-  );
+  void dateChanged(int year, int month, int day) {
+    emit(
+      state.copyWith(
+        date: state.date.copyWith(year: year, month: month, day: day),
+      ),
+    );
+    _refreshConflicts();
+  }
 
-  void timeChanged(int hour, int minute) => emit(
-    state.copyWith(
-      date: state.date.copyWith(hour: hour, minute: minute),
-    ),
-  );
+  void timeChanged(int hour, int minute) {
+    emit(
+      state.copyWith(
+        date: state.date.copyWith(hour: hour, minute: minute),
+      ),
+    );
+    _refreshConflicts();
+  }
 
   void notesChanged(String note) => emit(state.copyWith(note: note));
+
+  void durationChanged(Duration duration) {
+    emit(state.copyWith(duration: duration));
+    _refreshConflicts();
+  }
 
   void memberChanged(Member member) =>
       emit(state.copyWith(assignedMember: member));
@@ -138,6 +156,7 @@ class EventFormCubit extends FormCubit<EventFormState> {
       id: null,
       title: state.title,
       dateTime: state.date,
+      duration: state.duration,
       member: state.assignToMe ? null : state.assignedMember,
       notes: state.note,
     );
@@ -149,6 +168,7 @@ class EventFormCubit extends FormCubit<EventFormState> {
         if (savedEvent.id != null && state.reminders.isNotEmpty) {
           await _scheduleReminders(savedEvent.id!, savedEvent.title);
         }
+        unawaited(_rescheduleDailyBriefUC.call());
         emitComplete();
       },
     );
@@ -163,6 +183,7 @@ class EventFormCubit extends FormCubit<EventFormState> {
         id: state.eventId,
         title: state.title,
         dateTime: state.date,
+        duration: state.duration,
         member: state.assignToMe ? null : state.assignedMember,
         notes: state.note,
       );
@@ -173,6 +194,7 @@ class EventFormCubit extends FormCubit<EventFormState> {
         result,
         onSuccess: (updatedEvent) async {
           await _scheduleReminders(state.eventId!, updatedEvent.title);
+          unawaited(_rescheduleDailyBriefUC.call());
           emitComplete();
         },
       );
@@ -189,6 +211,7 @@ class EventFormCubit extends FormCubit<EventFormState> {
         result,
         onSuccess: (_) async {
           await _removeRemindersUC.call(state.eventId!);
+          unawaited(_rescheduleDailyBriefUC.call());
           emitComplete();
         },
       );
@@ -205,6 +228,29 @@ class EventFormCubit extends FormCubit<EventFormState> {
       reminders: state.reminders,
       memberName: state.assignedMember?.name,
     );
+  }
+
+  Future<void> _refreshConflicts() async {
+    final start = state.date.dateOnly;
+    final end = state.date.endOfDay;
+
+    final result = await _getEventsBetweenUC.call(start, end);
+    result.fold((_) {}, (list) {
+      final s = state;
+      final newStart = s.date;
+      final newEnd = s.date.add(s.duration);
+      final selfId = s.eventId;
+
+      final overlapping = list.where((ev) {
+        if (selfId != null && ev.id == selfId) return false;
+        final evEnd = ev.dateTime.add(ev.duration);
+        // Overlap iff intervals intersect: a.start < b.end && b.start < a.end
+        return newStart.isBefore(evEnd) && ev.dateTime.isBefore(newEnd);
+      }).toList()
+        ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+
+      emit(state.copyWith(conflicts: overlapping));
+    });
   }
 
   static DateTime _getCustomTime(DateTime? initialDate) {

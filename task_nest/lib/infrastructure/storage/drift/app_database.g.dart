@@ -338,6 +338,18 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _durationMinutesMeta = const VerificationMeta(
+    'durationMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> durationMinutes = GeneratedColumn<int>(
+    'duration_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(30),
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -362,7 +374,14 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
     ),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, title, timeDate, notes, memberId];
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    timeDate,
+    durationMinutes,
+    notes,
+    memberId,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -393,6 +412,15 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
       );
     } else if (isInserting) {
       context.missing(_timeDateMeta);
+    }
+    if (data.containsKey('duration_minutes')) {
+      context.handle(
+        _durationMinutesMeta,
+        durationMinutes.isAcceptableOrUnknown(
+          data['duration_minutes']!,
+          _durationMinutesMeta,
+        ),
+      );
     }
     if (data.containsKey('notes')) {
       context.handle(
@@ -427,6 +455,10 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}time_date'],
       )!,
+      durationMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_minutes'],
+      )!,
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -448,12 +480,14 @@ class Event extends DataClass implements Insertable<Event> {
   final int id;
   final String title;
   final DateTime timeDate;
+  final int durationMinutes;
   final String? notes;
   final int? memberId;
   const Event({
     required this.id,
     required this.title,
     required this.timeDate,
+    required this.durationMinutes,
     this.notes,
     this.memberId,
   });
@@ -463,6 +497,7 @@ class Event extends DataClass implements Insertable<Event> {
     map['id'] = Variable<int>(id);
     map['title'] = Variable<String>(title);
     map['time_date'] = Variable<DateTime>(timeDate);
+    map['duration_minutes'] = Variable<int>(durationMinutes);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
@@ -477,6 +512,7 @@ class Event extends DataClass implements Insertable<Event> {
       id: Value(id),
       title: Value(title),
       timeDate: Value(timeDate),
+      durationMinutes: Value(durationMinutes),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -495,6 +531,7 @@ class Event extends DataClass implements Insertable<Event> {
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       timeDate: serializer.fromJson<DateTime>(json['timeDate']),
+      durationMinutes: serializer.fromJson<int>(json['durationMinutes']),
       notes: serializer.fromJson<String?>(json['notes']),
       memberId: serializer.fromJson<int?>(json['memberId']),
     );
@@ -506,6 +543,7 @@ class Event extends DataClass implements Insertable<Event> {
       'id': serializer.toJson<int>(id),
       'title': serializer.toJson<String>(title),
       'timeDate': serializer.toJson<DateTime>(timeDate),
+      'durationMinutes': serializer.toJson<int>(durationMinutes),
       'notes': serializer.toJson<String?>(notes),
       'memberId': serializer.toJson<int?>(memberId),
     };
@@ -515,12 +553,14 @@ class Event extends DataClass implements Insertable<Event> {
     int? id,
     String? title,
     DateTime? timeDate,
+    int? durationMinutes,
     Value<String?> notes = const Value.absent(),
     Value<int?> memberId = const Value.absent(),
   }) => Event(
     id: id ?? this.id,
     title: title ?? this.title,
     timeDate: timeDate ?? this.timeDate,
+    durationMinutes: durationMinutes ?? this.durationMinutes,
     notes: notes.present ? notes.value : this.notes,
     memberId: memberId.present ? memberId.value : this.memberId,
   );
@@ -529,6 +569,9 @@ class Event extends DataClass implements Insertable<Event> {
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       timeDate: data.timeDate.present ? data.timeDate.value : this.timeDate,
+      durationMinutes: data.durationMinutes.present
+          ? data.durationMinutes.value
+          : this.durationMinutes,
       notes: data.notes.present ? data.notes.value : this.notes,
       memberId: data.memberId.present ? data.memberId.value : this.memberId,
     );
@@ -540,6 +583,7 @@ class Event extends DataClass implements Insertable<Event> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('timeDate: $timeDate, ')
+          ..write('durationMinutes: $durationMinutes, ')
           ..write('notes: $notes, ')
           ..write('memberId: $memberId')
           ..write(')'))
@@ -547,7 +591,8 @@ class Event extends DataClass implements Insertable<Event> {
   }
 
   @override
-  int get hashCode => Object.hash(id, title, timeDate, notes, memberId);
+  int get hashCode =>
+      Object.hash(id, title, timeDate, durationMinutes, notes, memberId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -555,6 +600,7 @@ class Event extends DataClass implements Insertable<Event> {
           other.id == this.id &&
           other.title == this.title &&
           other.timeDate == this.timeDate &&
+          other.durationMinutes == this.durationMinutes &&
           other.notes == this.notes &&
           other.memberId == this.memberId);
 }
@@ -563,12 +609,14 @@ class EventsCompanion extends UpdateCompanion<Event> {
   final Value<int> id;
   final Value<String> title;
   final Value<DateTime> timeDate;
+  final Value<int> durationMinutes;
   final Value<String?> notes;
   final Value<int?> memberId;
   const EventsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.timeDate = const Value.absent(),
+    this.durationMinutes = const Value.absent(),
     this.notes = const Value.absent(),
     this.memberId = const Value.absent(),
   });
@@ -576,6 +624,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
     this.id = const Value.absent(),
     required String title,
     required DateTime timeDate,
+    this.durationMinutes = const Value.absent(),
     this.notes = const Value.absent(),
     this.memberId = const Value.absent(),
   }) : title = Value(title),
@@ -584,6 +633,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
     Expression<int>? id,
     Expression<String>? title,
     Expression<DateTime>? timeDate,
+    Expression<int>? durationMinutes,
     Expression<String>? notes,
     Expression<int>? memberId,
   }) {
@@ -591,6 +641,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (timeDate != null) 'time_date': timeDate,
+      if (durationMinutes != null) 'duration_minutes': durationMinutes,
       if (notes != null) 'notes': notes,
       if (memberId != null) 'member_id': memberId,
     });
@@ -600,6 +651,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
     Value<int>? id,
     Value<String>? title,
     Value<DateTime>? timeDate,
+    Value<int>? durationMinutes,
     Value<String?>? notes,
     Value<int?>? memberId,
   }) {
@@ -607,6 +659,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
       id: id ?? this.id,
       title: title ?? this.title,
       timeDate: timeDate ?? this.timeDate,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
       notes: notes ?? this.notes,
       memberId: memberId ?? this.memberId,
     );
@@ -624,6 +677,9 @@ class EventsCompanion extends UpdateCompanion<Event> {
     if (timeDate.present) {
       map['time_date'] = Variable<DateTime>(timeDate.value);
     }
+    if (durationMinutes.present) {
+      map['duration_minutes'] = Variable<int>(durationMinutes.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -639,6 +695,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('timeDate: $timeDate, ')
+          ..write('durationMinutes: $durationMinutes, ')
           ..write('notes: $notes, ')
           ..write('memberId: $memberId')
           ..write(')'))
@@ -942,6 +999,7 @@ typedef $$EventsTableCreateCompanionBuilder =
       Value<int> id,
       required String title,
       required DateTime timeDate,
+      Value<int> durationMinutes,
       Value<String?> notes,
       Value<int?> memberId,
     });
@@ -950,6 +1008,7 @@ typedef $$EventsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> title,
       Value<DateTime> timeDate,
+      Value<int> durationMinutes,
       Value<String?> notes,
       Value<int?> memberId,
     });
@@ -997,6 +1056,11 @@ class $$EventsTableFilterComposer
 
   ColumnFilters<DateTime> get timeDate => $composableBuilder(
     column: $table.timeDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1053,6 +1117,11 @@ class $$EventsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
@@ -1099,6 +1168,11 @@ class $$EventsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get timeDate =>
       $composableBuilder(column: $table.timeDate, builder: (column) => column);
+
+  GeneratedColumn<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
@@ -1158,12 +1232,14 @@ class $$EventsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<DateTime> timeDate = const Value.absent(),
+                Value<int> durationMinutes = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int?> memberId = const Value.absent(),
               }) => EventsCompanion(
                 id: id,
                 title: title,
                 timeDate: timeDate,
+                durationMinutes: durationMinutes,
                 notes: notes,
                 memberId: memberId,
               ),
@@ -1172,12 +1248,14 @@ class $$EventsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String title,
                 required DateTime timeDate,
+                Value<int> durationMinutes = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int?> memberId = const Value.absent(),
               }) => EventsCompanion.insert(
                 id: id,
                 title: title,
                 timeDate: timeDate,
+                durationMinutes: durationMinutes,
                 notes: notes,
                 memberId: memberId,
               ),

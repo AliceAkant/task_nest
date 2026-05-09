@@ -21,6 +21,12 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       'High priority reminders for scheduled events';
   static const String _prefsKeyPrefix = 'event_reminders_';
 
+  /// Daily-brief IDs reserved range: [_dailyBriefIdBase, _dailyBriefIdBase+30).
+  /// Won't collide with per-event reminder IDs since event IDs * 10 are
+  /// typically much smaller and the offset is large.
+  static const int _dailyBriefIdBase = 2000000000;
+  static const int _dailyBriefMaxDays = 14;
+
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
@@ -249,4 +255,31 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
 
   int _notificationId(int eventId, ReminderOffset reminder) =>
       (eventId * 10 + reminder.index) % 2147483647;
+
+  @override
+  Future<void> scheduleDailyBrief({
+    required int dayId,
+    required DateTime scheduledAt,
+    required String title,
+    required String body,
+  }) async {
+    if (dayId < 0 || dayId >= _dailyBriefMaxDays) return;
+    if (!scheduledAt.isAfter(DateTime.now())) return;
+    final id = (_dailyBriefIdBase + dayId) % 2147483647;
+    await _plugin.cancel(id);
+    await _scheduleNotification(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: scheduledAt,
+    );
+  }
+
+  @override
+  Future<void> cancelAllDailyBriefs() async {
+    for (var i = 0; i < _dailyBriefMaxDays; i++) {
+      final id = (_dailyBriefIdBase + i) % 2147483647;
+      await _plugin.cancel(id);
+    }
+  }
 }
