@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
-import 'package:task_nest/presentation/extensions/date_time_extension.dart';
+import 'package:task_nest/core/extensions/date_time_extension.dart';
 import 'package:task_nest/presentation/extensions/string_extension.dart';
 import 'package:task_nest/presentation/helpers/ui_helper.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
@@ -64,13 +64,10 @@ class _DatePickerState extends State<DatePicker> {
           backgroundColor: context.colors.background,
           child: CalendarView(
             initialDate: _selectedDate,
-            firstDate: widget.startDate ??
-                DateTime.now()
-                    .subtract(const Duration(days: 365))
-                    .dateOnly,
-            lastDate: DateTime.now()
-                .add(const Duration(days: 365))
-                .dateOnly,
+            firstDate:
+                widget.startDate ??
+                DateTime.now().subtract(const Duration(days: 365)).dateOnly,
+            lastDate: DateTime.now().add(const Duration(days: 365)).dateOnly,
             dayEventCountMap: widget.eventsCountMap,
             resetAvailable: widget.showResetButton,
             onSubmit: (date) => Navigator.pop(ctx, date),

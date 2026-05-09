@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
+import 'package:task_nest/presentation/extensions/avatar_extension.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
 import 'package:task_nest/presentation/widgets/avatar_option.dart';
 

@@ -22,25 +22,42 @@ import 'package:task_nest/presentation/widgets/text_input.dart';
 import 'package:task_nest/presentation/widgets/views/avatar_selection_view.dart';
 import 'package:task_nest/presentation/widgets/views/member_theme_selection_view.dart';
 
-class MemberFormScreen extends StatelessWidget {
+class MemberFormScreen extends StatefulWidget {
   final FormMode mode;
   final Member? initialMember;
+
+  const MemberFormScreen({
+    super.key,
+    required this.mode,
+    this.initialMember,
+  });
+
+  const MemberFormScreen.add({super.key})
+    : mode = FormMode.add,
+      initialMember = null;
+
+  const MemberFormScreen.edit({super.key, required Member member})
+    : mode = FormMode.edit,
+      initialMember = member;
+
+  @override
+  State<MemberFormScreen> createState() => _MemberFormScreenState();
+}
+
+class _MemberFormScreenState extends State<MemberFormScreen> {
   late final TextEditingController _nameController;
 
-  MemberFormScreen({super.key, required this.mode, this.initialMember}) {
-    _nameController = TextEditingController(text: initialMember?.name ?? '');
+  @override
+  void initState() {
+    super.initState();
+    _nameController =
+        TextEditingController(text: widget.initialMember?.name ?? '');
   }
 
-  MemberFormScreen.add({super.key})
-    : mode = FormMode.add,
-      initialMember = null {
-    _nameController = TextEditingController();
-  }
-
-  MemberFormScreen.edit({super.key, required Member member})
-    : mode = FormMode.edit,
-      initialMember = member {
-    _nameController = TextEditingController(text: member.name);
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
   Future _deleteMember(BuildContext context) async {
@@ -64,7 +81,7 @@ class MemberFormScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MemberFormCubit(mode, initialMember),
+      create: (_) => MemberFormCubit(widget.mode, widget.initialMember),
       child: BlocConsumer<MemberFormCubit, MemberFormState>(
         listener: (context, state) {
           if (state.completed == true) {
@@ -85,7 +102,7 @@ class MemberFormScreen extends StatelessWidget {
             appBar: AppBarCreator.modal(
               context,
               isCloseDisabled: state.isSaving,
-              titleKey: mode == FormMode.add
+              titleKey: widget.mode == FormMode.add
                   ? LocaleKeys.add_member
                   : LocaleKeys.edit_member,
             ),
@@ -143,7 +160,7 @@ class MemberFormScreen extends StatelessWidget {
 
                     // BUTTONS
                     FormButtonsRow(
-                      mode: mode,
+                      mode: widget.mode,
                       addTextKey: LocaleKeys.add_member,
                       saveTextKey: LocaleKeys.save,
                       onSave: () => cubit.save(),

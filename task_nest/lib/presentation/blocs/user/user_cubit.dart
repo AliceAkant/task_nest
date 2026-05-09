@@ -5,9 +5,7 @@ import 'package:task_nest/core/logger/logger_helper.dart';
 import 'package:task_nest/domain/entities/user_profile.dart';
 import 'package:task_nest/domain/entities/user_settings.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
-import 'package:task_nest/domain/usecases/user/get_user_usecase.dart';
-import 'package:task_nest/domain/usecases/user/initialize_user_usecase.dart';
-import 'package:task_nest/domain/usecases/user/update_user_usecase.dart';
+import 'package:task_nest/domain/usecases/user_use_cases.dart';
 import 'package:task_nest/infrastructure/di/injection.dart';
 
 class UserCubit extends Cubit<UserProfile?> {

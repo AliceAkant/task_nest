@@ -3,8 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_nest/domain/entities/event.dart';
 import 'package:task_nest/domain/entities/member.dart';
-import 'package:task_nest/domain/usecases/events/get_events_between_date_usecase.dart';
-import 'package:task_nest/domain/usecases/events/get_events_by_date_usecase.dart';
+import 'package:task_nest/domain/usecases/events_use_cases.dart';
 import 'package:task_nest/infrastructure/di/injection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:task_nest/presentation/blocs/members/members_cubit.dart';
@@ -12,13 +11,12 @@ import 'package:task_nest/presentation/blocs/user/user_cubit.dart';
 import 'package:task_nest/presentation/enum/date_filter_mode.dart';
 import 'package:task_nest/presentation/enum/member_filter_mode.dart';
 import 'package:task_nest/presentation/enum/schedule_view_mode.dart';
-import 'package:task_nest/presentation/extensions/date_time_extension.dart';
+import 'package:task_nest/core/extensions/date_time_extension.dart';
 
 part 'schedule_state.dart';
 
 class ScheduleCubit extends Cubit<ScheduleState> {
   final GetEventsBetweenDateUseCase _getEventsBetweenDate;
-  final GetEventsByDateUseCase _getEventsByDate;
 
   late final StreamSubscription _membersSubscription;
 
@@ -26,7 +24,6 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     required UserCubit userCubit,
     required MembersCubit membersCubit,
   }) : _getEventsBetweenDate = DI.container<GetEventsBetweenDateUseCase>(),
-       _getEventsByDate = DI.container<GetEventsByDateUseCase>(),
        super(
          ScheduleState.initial(
            onlyMineDefault: userCubit.state?.settings.showOnlyMyEvents ?? false,
@@ -74,15 +71,15 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
   }
 
-  void setViewMode(ScheduleViewMode mode) {
+  Future<void> setViewMode(ScheduleViewMode mode) async {
     if (state.viewMode == mode) return;
     switch (mode) {
       case ScheduleViewMode.day:
         emit(state.copyWith(viewMode: mode));
-        loadMainSchedule();
+        await loadMainSchedule();
       case ScheduleViewMode.week:
         emit(state.copyWith(viewMode: mode));
-        loadWeek();
+        await loadWeek();
       case ScheduleViewMode.month:
         emit(state.copyWith(
           viewMode: mode,
@@ -208,7 +205,7 @@ class ScheduleCubit extends Cubit<ScheduleState> {
       ),
     );
 
-    final result = await _getEventsByDate.call(dateFilter);
+    final result = await _getEventsBetweenDate.call(dateFilter, dateFilter);
 
     result.fold(
       (failure) => emit(

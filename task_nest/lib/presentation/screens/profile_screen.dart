@@ -17,11 +17,28 @@ import 'package:task_nest/presentation/widgets/rounded_button.dart';
 import 'package:task_nest/presentation/widgets/text_input.dart';
 import 'package:task_nest/presentation/widgets/views/avatar_selection_view.dart';
 
-class ProfileScreen extends StatelessWidget {
-  final TextEditingController _nameController = TextEditingController();
+class ProfileScreen extends StatefulWidget {
+  final String? username;
 
-  ProfileScreen({super.key, required String? username}) {
-    _nameController.text = username ?? '';
+  const ProfileScreen({super.key, required this.username});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late final TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.username ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
   @override

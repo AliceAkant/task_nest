@@ -4,12 +4,10 @@ import 'package:task_nest/domain/entities/event.dart';
 
 abstract class EventsRepository {
   Future<Either<Failure, List<Event>>> getAllEvents();
-  Future<Either<Failure, List<Event>>> getEventsByDate(DateTime date);
   Future<Either<Failure, List<Event>>> getEventsBetween(
     DateTime start,
     DateTime end,
   );
-  Future<Either<Failure, List<Event>>> getEventsByMemberId(int? memberId);
   Future<Either<Failure, Map<DateTime, int>>> getEventsCount(
     DateTime start,
     int monthsCount,

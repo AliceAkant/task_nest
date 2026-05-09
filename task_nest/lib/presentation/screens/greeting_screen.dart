@@ -14,10 +14,21 @@ import 'package:task_nest/presentation/widgets/rounded_button.dart';
 import 'package:task_nest/presentation/widgets/text_input.dart';
 import 'package:task_nest/presentation/widgets/views/avatar_selection_view.dart';
 
-class GreetingScreen extends StatelessWidget {
+class GreetingScreen extends StatefulWidget {
+  const GreetingScreen({super.key});
+
+  @override
+  State<GreetingScreen> createState() => _GreetingScreenState();
+}
+
+class _GreetingScreenState extends State<GreetingScreen> {
   final TextEditingController _nameController = TextEditingController();
 
-  GreetingScreen({super.key});
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

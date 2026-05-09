@@ -1,18 +1,24 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:app_settings/app_settings.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:task_nest/domain/enums/notification_permission_result.dart';
 import 'package:task_nest/domain/enums/reminder_offset.dart';
+import 'package:task_nest/domain/repositories/notifications_repository.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-class NotificationService {
+class NotificationsRepositoryImpl implements NotificationsRepository {
   static const String _channelId = 'task_nest_reminders';
   static const String _channelName = 'Event Reminders';
-  static const String _channelDescription = 'High priority reminders for scheduled events';
+  static const String _channelDescription =
+      'High priority reminders for scheduled events';
   static const String _prefsKeyPrefix = 'event_reminders_';
 
   final FlutterLocalNotificationsPlugin _plugin =
@@ -20,7 +26,7 @@ class NotificationService {
 
   Future<void> initialize() async {
     tz.initializeTimeZones();
-    final String localTimezone = await FlutterTimezone.getLocalTimezone();
+    final localTimezone = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(localTimezone));
 
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -36,7 +42,8 @@ class NotificationService {
 
     await _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(
           const AndroidNotificationChannel(
             _channelId,
@@ -49,40 +56,55 @@ class NotificationService {
         );
   }
 
-  Future<bool> requestPermissions() async {
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    final ios = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
-
-    if (android != null) {
-      final granted =
-          await android.requestNotificationsPermission() ?? false;
-      await android.requestExactAlarmsPermission();
-      return granted;
-    }
-    if (ios != null) {
-      final granted = await ios.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-          ) ??
-          false;
-      return granted;
-    }
-    return false;
-  }
-
+  @override
   Future<bool> checkPermissions() async {
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    if (android != null) {
-      return await android.areNotificationsEnabled() ?? false;
+    if (Platform.isIOS) {
+      final ios = _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+      final settings = await ios?.checkPermissions();
+      if (settings == null) return false;
+      return settings.isEnabled;
     }
-    // iOS не даёт проверить статус без запроса, считаем включёнными
-    return true;
+    final status = await Permission.notification.status;
+    return status.isGranted || status.isProvisional;
   }
 
+  /// Show the OS dialog if permission is undetermined. Never opens OS Settings.
+  /// Callers handle "denied" by routing the user to settings themselves.
+  @override
+  Future<NotificationPermissionResult> requestPermissions() async {
+    if (await checkPermissions()) {
+      await _ensureExactAlarmsPermissionAndroid();
+      return NotificationPermissionResult.granted;
+    }
+
+    if (Platform.isAndroid) {
+      final status = await Permission.notification.status;
+      if (status.isPermanentlyDenied) {
+        return NotificationPermissionResult.permanentlyDenied;
+      }
+    }
+
+    final granted = await _platformRequestPermission();
+    if (granted) {
+      await _ensureExactAlarmsPermissionAndroid();
+      return NotificationPermissionResult.granted;
+    }
+
+    if (Platform.isAndroid) {
+      final after = await Permission.notification.status;
+      if (after.isPermanentlyDenied) {
+        return NotificationPermissionResult.permanentlyDenied;
+      }
+    }
+    return NotificationPermissionResult.denied;
+  }
+
+  @override
+  Future<void> openSystemSettings() =>
+      AppSettings.openAppSettings(type: AppSettingsType.notification);
+
+  @override
   Future<void> scheduleEventReminders({
     required int eventId,
     required String eventTitle,
@@ -90,7 +112,7 @@ class NotificationService {
     required Set<ReminderOffset> reminders,
     String? memberName,
   }) async {
-    await cancelEventReminders(eventId);
+    await removeEventReminders(eventId);
 
     if (reminders.isEmpty) return;
 
@@ -117,37 +139,70 @@ class NotificationService {
     }
   }
 
-  Future<void> cancelEventReminders(int eventId) async {
+  @override
+  Future<void> removeEventReminders(int eventId) async {
     for (final reminder in ReminderOffset.values) {
       await _plugin.cancel(_notificationId(eventId, reminder));
     }
   }
 
+  @override
+  Future<void> cancelAllNotifications() => _plugin.cancelAll();
+
+  @override
   Future<void> saveEventReminders(
     int eventId,
     Set<ReminderOffset> reminders,
   ) async {
     final prefs = await SharedPreferences.getInstance();
     final indices = reminders.map((r) => r.index).toList();
-    await prefs.setString(
-      '$_prefsKeyPrefix$eventId',
-      jsonEncode(indices),
-    );
+    await prefs.setString('$_prefsKeyPrefix$eventId', jsonEncode(indices));
   }
 
+  @override
   Future<Set<ReminderOffset>> loadEventReminders(int eventId) async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString('$_prefsKeyPrefix$eventId');
     if (raw == null) return {};
     final List<dynamic> indices = jsonDecode(raw);
     return indices
-        .map((i) => ReminderOffset.values[i as int])
+        .whereType<int>()
+        .where((i) => i >= 0 && i < ReminderOffset.values.length)
+        .map((i) => ReminderOffset.values[i])
         .toSet();
   }
 
+  @override
   Future<void> clearEventReminders(int eventId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('$_prefsKeyPrefix$eventId');
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /// On iOS go through flutter_local_notifications (UNUserNotificationCenter
+  /// directly) — this reliably triggers the system prompt the first time.
+  /// On Android use permission_handler.
+  Future<bool> _platformRequestPermission() async {
+    if (Platform.isIOS) {
+      final ios = _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+      return await ios?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          ) ??
+          false;
+    }
+    final result = await Permission.notification.request();
+    return result.isGranted || result.isProvisional;
+  }
+
+  Future<void> _ensureExactAlarmsPermissionAndroid() async {
+    if (!Platform.isAndroid) return;
+    final android = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    await android?.requestExactAlarmsPermission();
   }
 
   Future<void> _scheduleNotification({

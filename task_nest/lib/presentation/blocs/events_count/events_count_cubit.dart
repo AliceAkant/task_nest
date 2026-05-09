@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:task_nest/domain/usecases/events/get_events_count_usecase.dart';
+import 'package:task_nest/domain/usecases/events_use_cases.dart';
 import 'package:task_nest/infrastructure/di/injection.dart';
-import 'package:task_nest/presentation/extensions/date_time_extension.dart';
+import 'package:task_nest/core/extensions/date_time_extension.dart';
 
 part 'events_count_state.dart';
 

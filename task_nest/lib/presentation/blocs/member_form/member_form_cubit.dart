@@ -1,7 +1,5 @@
 import 'package:task_nest/domain/entities/member.dart';
-import 'package:task_nest/domain/usecases/members/add_member_usecase.dart';
-import 'package:task_nest/domain/usecases/members/delete_member_usecase.dart';
-import 'package:task_nest/domain/usecases/members/update_member_usecase.dart';
+import 'package:task_nest/domain/usecases/members_use_cases.dart';
 import 'package:task_nest/infrastructure/di/injection.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
 import 'package:task_nest/presentation/blocs/base_form/base_form_cubit.dart';
@@ -52,11 +50,13 @@ class MemberFormCubit extends FormCubit<MemberFormState> {
   }
 
   Future _addMember() async {
-    final result = await _addMemberUC.call(
-      state.name,
-      state.memberTheme,
-      state.avatar,
+    final member = Member(
+      id: 0,
+      name: state.name,
+      theme: state.memberTheme,
+      avatar: state.avatar,
     );
+    final result = await _addMemberUC.call(member);
 
     processUseCaseResult<Member>(result, onSuccess: (_) => emitComplete());
   }

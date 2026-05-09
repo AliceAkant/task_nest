@@ -8,7 +8,7 @@ import 'package:task_nest/infrastructure/localization/locale_keys.dart';
 import 'package:task_nest/presentation/blocs/user/user_cubit.dart';
 import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
-import 'package:task_nest/presentation/extensions/date_time_extension.dart';
+import 'package:task_nest/core/extensions/date_time_extension.dart';
 import 'package:task_nest/presentation/helpers/assets_helper.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
 import 'package:task_nest/presentation/theme/theme_cubit.dart';

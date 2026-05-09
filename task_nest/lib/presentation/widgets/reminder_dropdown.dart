@@ -14,9 +14,11 @@ import 'package:task_nest/presentation/widgets/tappable_box.dart';
 class ReminderDropdown extends StatefulWidget {
   final Set<ReminderOffset> selectedReminders;
   final bool isRussian;
+  final bool osPermissionGranted;
   final String noReminderKey;
   final Future<void> Function(ReminderOffset) onToggled;
   final VoidCallback onNoReminderSelected;
+  final VoidCallback? onLockedTap;
 
   const ReminderDropdown({
     super.key,
@@ -25,6 +27,8 @@ class ReminderDropdown extends StatefulWidget {
     required this.noReminderKey,
     required this.onToggled,
     required this.onNoReminderSelected,
+    this.osPermissionGranted = true,
+    this.onLockedTap,
   });
 
   @override
@@ -247,11 +251,18 @@ class _ReminderDropdownState extends State<ReminderDropdown>
                         final label = widget.isRussian
                             ? reminder.labelRu()
                             : reminder.labelEn();
+                        final disabled = !widget.osPermissionGranted;
 
                         return _DropdownItem(
                           label: label,
                           isSelected: isSelected,
-                          onTap: () => _handleToggle(reminder),
+                          isDisabled: disabled,
+                          onTap: disabled
+                              ? () {
+                                  _closeDropdown();
+                                  widget.onLockedTap?.call();
+                                }
+                              : () => _handleToggle(reminder),
                         );
                       },
                     ),
@@ -270,16 +281,24 @@ class _ReminderDropdownState extends State<ReminderDropdown>
 class _DropdownItem extends StatelessWidget {
   final String label;
   final bool isSelected;
+  final bool isDisabled;
   final VoidCallback onTap;
 
   const _DropdownItem({
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final labelColor = isDisabled
+        ? context.colors.labelDisable
+        : isSelected
+        ? context.colors.purple
+        : context.colors.labelPrimary;
+
     return SizedBox(
       height: _ReminderDropdownState._itemHeight,
       child: Padding(
@@ -287,7 +306,9 @@ class _DropdownItem extends StatelessWidget {
         child: TappableBox(
           onTap: onTap,
           splashColor: context.colors.defaultSplash,
-          backgroundColor: isSelected ? context.colors.lightPurple40 : null,
+          backgroundColor: isSelected && !isDisabled
+              ? context.colors.lightPurple40
+              : null,
           borderRadius: BorderRadius.circular(AppSizes.cardRadius),
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -302,16 +323,20 @@ class _DropdownItem extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: TypographyConst.fontFamily,
                       fontSize: TypographyConst.labelStandart,
-                      fontWeight: isSelected
+                      fontWeight: isSelected && !isDisabled
                           ? TypographyConst.wSemiBold
                           : TypographyConst.wRegular,
-                      color: isSelected
-                          ? context.colors.purple
-                          : context.colors.labelPrimary,
+                      color: labelColor,
                     ),
                   ),
                 ),
-                if (isSelected)
+                if (isDisabled)
+                  Icon(
+                    Icons.lock_outline,
+                    size: AppSizes.size18,
+                    color: context.colors.labelDisable,
+                  )
+                else if (isSelected)
                   AssetsHelper.getSvgImage(
                     AppSvg.checkMark,
                     width: AppSizes.size18,

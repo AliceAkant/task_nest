@@ -27,8 +27,33 @@ import 'package:task_nest/presentation/widgets/base_text.dart';
 import 'package:task_nest/presentation/widgets/checkable_item.dart';
 import 'package:task_nest/presentation/widgets/switcher.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<SettingsCubit>().refreshPermissionState();
+    }
+  }
 
   Future _goToProfile(BuildContext context, UserProfile user) async {
     await context.push(AppRoutes.profile, extra: user);
@@ -196,9 +221,7 @@ class SettingsScreen extends StatelessWidget {
             children: [
               Expanded(child: BaseText(LocaleKeys.allow_notifications)),
               Switcher(
-                // key нужен чтобы пересоздать Switcher при смене состояния
-                key: ValueKey(isEnabled),
-                initialValue: isEnabled,
+                value: isEnabled,
                 onChanged: (value) =>
                     context.read<SettingsCubit>().toggleNotifications(value),
               ),

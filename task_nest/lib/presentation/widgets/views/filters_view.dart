@@ -3,7 +3,7 @@ import 'package:task_nest/domain/entities/member.dart';
 import 'package:task_nest/infrastructure/localization/locale_keys.dart';
 import 'package:task_nest/presentation/enum/member_filter_mode.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
-import 'package:task_nest/presentation/extensions/date_time_extension.dart';
+import 'package:task_nest/core/extensions/date_time_extension.dart';
 import 'package:task_nest/presentation/extensions/string_extension.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
 import 'package:task_nest/presentation/theme/typography.dart';

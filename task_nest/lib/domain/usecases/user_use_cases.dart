@@ -11,3 +11,20 @@ class InitializeUserUseCase {
   Future<Either<Failure, UserProfile>> call(UserProfile user) =>
       repository.initializeUser(user);
 }
+
+class GetUserUseCase {
+  final UserProfileRepository repository;
+
+  GetUserUseCase(this.repository);
+
+  Future<Either<Failure, UserProfile?>> call() => repository.getUser();
+}
+
+class UpdateUserUseCase {
+  final UserProfileRepository repository;
+
+  UpdateUserUseCase(this.repository);
+
+  Future<Either<Failure, bool>> call(UserProfile user) =>
+      repository.updateUser(user);
+}

@@ -58,50 +58,6 @@ class EventsRepositoryImpl implements EventsRepository {
   }
 
   @override
-  Future<Either<Failure, List<Event>>> getEventsByDate(DateTime date) async {
-    LoggerHelper.info('try to load events by date: ${date.toIso8601String()}');
-
-    final result = await local.getEventsByDate(date);
-
-    return result.fold(
-      (failure) {
-        LoggerHelper.databaseError(
-          'Load events by date failed: ${failure.message}',
-        );
-        return Left(failure);
-      },
-      (list) {
-        LoggerHelper.info('Load events by date success: ${list.length} items');
-        return Right(list.map((e) => e.toEntity()).toList());
-      },
-    );
-  }
-
-  @override
-  Future<Either<Failure, List<Event>>> getEventsByMemberId(
-    int? memberId,
-  ) async {
-    LoggerHelper.info('Try to load events by member: ${memberId ?? 'null'}');
-
-    final result = await local.getEventsByMemberId(memberId);
-
-    return result.fold(
-      (failure) {
-        LoggerHelper.databaseError(
-          'Load events by member failed: ${failure.message}',
-        );
-        return Left(failure);
-      },
-      (list) {
-        LoggerHelper.info(
-          'Load events by member success: ${list.length} items',
-        );
-        return Right(list.map((e) => e.toEntity()).toList());
-      },
-    );
-  }
-
-  @override
   Future<Either<Failure, Map<DateTime, int>>> getEventsCount(
     DateTime start,
     int monthsCount,

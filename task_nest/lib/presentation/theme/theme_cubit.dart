@@ -1,32 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:task_nest/infrastructure/storage/sp/shared_preferences_helper.dart';
+import 'package:task_nest/domain/enums/app_theme_mode.dart';
+import 'package:task_nest/domain/usecases/app_preferences_use_cases.dart';
+import 'package:task_nest/infrastructure/di/injection.dart';
 import 'package:task_nest/presentation/theme/theme_helper.dart';
 
 class ThemeCubit extends Cubit<ThemeMode> {
-  ThemeCubit(super.initialMode);
+  final SetThemeModeUseCase _setThemeMode;
 
-  void toggleLight() {
-    if (state != ThemeMode.light) {
-      var newTheme = ThemeMode.light;
+  ThemeCubit(super.initialMode)
+    : _setThemeMode = DI.container<SetThemeModeUseCase>();
 
-      ThemeHelper.changeNativeBarColors(newTheme);
+  void toggleLight() => _apply(ThemeMode.light);
 
-      emit(newTheme);
+  void toggleDark() => _apply(ThemeMode.dark);
 
-      SharedPreferencesHelper.setThemeMode(newTheme);
-    }
-  }
-
-  void toggleDark() {
-    if (state != ThemeMode.dark) {
-      var newTheme = ThemeMode.dark;
-
-      ThemeHelper.changeNativeBarColors(newTheme);
-
-      emit(newTheme);
-
-      SharedPreferencesHelper.setThemeMode(newTheme);
-    }
+  void _apply(ThemeMode newTheme) {
+    if (state == newTheme) return;
+    ThemeHelper.changeNativeBarColors(newTheme);
+    emit(newTheme);
+    _setThemeMode.call(
+      newTheme == ThemeMode.dark ? AppThemeMode.dark : AppThemeMode.light,
+    );
   }
 }

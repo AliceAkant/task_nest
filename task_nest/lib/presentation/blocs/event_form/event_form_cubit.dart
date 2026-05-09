@@ -1,43 +1,65 @@
 import 'package:task_nest/domain/entities/event.dart';
 import 'package:task_nest/domain/entities/member.dart';
 import 'package:task_nest/domain/enums/reminder_offset.dart';
-import 'package:task_nest/domain/usecases/events/add_event_usecase.dart';
-import 'package:task_nest/domain/usecases/events/delete_event_usecase.dart';
-import 'package:task_nest/domain/usecases/events/update_event_usecase.dart';
+import 'package:task_nest/domain/usecases/events_use_cases.dart';
+import 'package:task_nest/domain/usecases/notifications_use_cases.dart';
 import 'package:task_nest/infrastructure/di/injection.dart';
-import 'package:task_nest/infrastructure/notifications/notification_service.dart';
 import 'package:task_nest/presentation/blocs/base_form/base_form_cubit.dart';
 import 'package:task_nest/presentation/enum/form_mode.dart';
-import 'package:task_nest/presentation/extensions/date_time_extension.dart';
+import 'package:task_nest/core/extensions/date_time_extension.dart';
 import 'event_form_state.dart';
 
 class EventFormCubit extends FormCubit<EventFormState> {
   final AddEventUseCase _addEventUC;
   final UpdateEventUseCase _editEventUC;
   final DeleteEventUseCase _deleteEventUC;
-  final NotificationService _notificationService;
+  final ScheduleEventRemindersUseCase _scheduleRemindersUC;
+  final RemoveEventRemindersUseCase _removeRemindersUC;
+  final LoadEventRemindersUseCase _loadRemindersUC;
+  final GetNotificationsStateUseCase _getNotificationsStateUC;
+  final SetNotificationsMutedUseCase _setMutedUC;
+  final OpenNotificationSettingsUseCase _openSettingsUC;
 
-  bool _remindersLoaded = false;
+  Future<void>? _remindersLoading;
 
   EventFormCubit(FormMode mode, Event? initialEvent, DateTime? initialDate)
     : _addEventUC = DI.container<AddEventUseCase>(),
       _editEventUC = DI.container<UpdateEventUseCase>(),
       _deleteEventUC = DI.container<DeleteEventUseCase>(),
-      _notificationService = DI.container<NotificationService>(),
+      _scheduleRemindersUC = DI.container<ScheduleEventRemindersUseCase>(),
+      _removeRemindersUC = DI.container<RemoveEventRemindersUseCase>(),
+      _loadRemindersUC = DI.container<LoadEventRemindersUseCase>(),
+      _getNotificationsStateUC =
+          DI.container<GetNotificationsStateUseCase>(),
+      _setMutedUC = DI.container<SetNotificationsMutedUseCase>(),
+      _openSettingsUC = DI.container<OpenNotificationSettingsUseCase>(),
       super(
         EventFormState.initial(mode, initialEvent, _getCustomTime(initialDate)),
       ) {
     if (initialEvent?.id != null) {
-      _loadReminders(initialEvent!.id!);
-    } else {
-      _remindersLoaded = true;
+      _remindersLoading = _loadReminders(initialEvent!.id!);
     }
+    refreshPermission();
   }
 
   Future<void> _loadReminders(int eventId) async {
-    final reminders = await _notificationService.loadEventReminders(eventId);
-    _remindersLoaded = true;
+    final reminders = await _loadRemindersUC.call(eventId);
     emit(state.copyWith(reminders: reminders));
+  }
+
+  Future<void> refreshPermission() async {
+    final s = await _getNotificationsStateUC.call();
+    if (state.osPermissionGranted != s.osGranted ||
+        state.notificationsMuted != s.muted) {
+      emit(state.copyWith(
+        osPermissionGranted: s.osGranted,
+        notificationsMuted: s.muted,
+      ));
+    }
+  }
+
+  Future<void> openNotificationSettings() async {
+    await _openSettingsUC.call();
   }
 
   ///
@@ -69,11 +91,20 @@ class EventFormCubit extends FormCubit<EventFormState> {
 
   void clearReminders() => emit(state.copyWith(reminders: {}));
 
+  /// Tapping a reminder offset:
+  /// * OS denied → caller (dropdown) routes tap to openNotificationSettings.
+  ///   This method should not be called in that case.
+  /// * Locally muted → silently auto-unmute, then add to state.
+  /// * Active → just toggle.
   Future<void> reminderToggled(ReminderOffset reminder) async {
+    if (!state.osPermissionGranted) return;
+
     final isAdding = !state.reminders.contains(reminder);
-    if (isAdding) {
-      await _notificationService.requestPermissions();
+    if (isAdding && state.notificationsMuted) {
+      await _setMutedUC.call(false);
+      emit(state.copyWith(notificationsMuted: false));
     }
+
     final current = Set<ReminderOffset>.from(state.reminders);
     if (current.contains(reminder)) {
       current.remove(reminder);
@@ -103,12 +134,14 @@ class EventFormCubit extends FormCubit<EventFormState> {
   }
 
   Future _addEvent() async {
-    final result = await _addEventUC.call(
-      state.title,
-      state.date,
-      state.assignToMe ? null : state.assignedMember,
-      state.note,
+    final event = Event(
+      id: null,
+      title: state.title,
+      dateTime: state.date,
+      member: state.assignToMe ? null : state.assignedMember,
+      notes: state.note,
     );
+    final result = await _addEventUC.call(event);
 
     processUseCaseResult<Event>(
       result,
@@ -123,6 +156,9 @@ class EventFormCubit extends FormCubit<EventFormState> {
 
   Future _editEvent() async {
     if (state.eventId != null) {
+      // Wait for existing reminders to load so we don't overwrite them with empty.
+      await _remindersLoading;
+
       final event = Event(
         id: state.eventId,
         title: state.title,
@@ -136,9 +172,7 @@ class EventFormCubit extends FormCubit<EventFormState> {
       processUseCaseResult<Event>(
         result,
         onSuccess: (updatedEvent) async {
-          if (_remindersLoaded) {
-            await _scheduleReminders(state.eventId!, updatedEvent.title);
-          }
+          await _scheduleReminders(state.eventId!, updatedEvent.title);
           emitComplete();
         },
       );
@@ -154,8 +188,7 @@ class EventFormCubit extends FormCubit<EventFormState> {
       processUseCaseResult<bool>(
         result,
         onSuccess: (_) async {
-          await _notificationService.cancelEventReminders(state.eventId!);
-          await _notificationService.clearEventReminders(state.eventId!);
+          await _removeRemindersUC.call(state.eventId!);
           emitComplete();
         },
       );
@@ -165,14 +198,13 @@ class EventFormCubit extends FormCubit<EventFormState> {
   }
 
   Future<void> _scheduleReminders(int eventId, String eventTitle) async {
-    await _notificationService.scheduleEventReminders(
+    await _scheduleRemindersUC.call(
       eventId: eventId,
       eventTitle: eventTitle,
       eventDateTime: state.date,
       reminders: state.reminders,
       memberName: state.assignedMember?.name,
     );
-    await _notificationService.saveEventReminders(eventId, state.reminders);
   }
 
   static DateTime _getCustomTime(DateTime? initialDate) {

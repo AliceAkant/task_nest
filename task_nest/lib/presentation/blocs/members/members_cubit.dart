@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:task_nest/domain/entities/member.dart';
-import 'package:task_nest/domain/usecases/members/get_members_usecase.dart';
+import 'package:task_nest/domain/usecases/members_use_cases.dart';
 import 'package:task_nest/infrastructure/di/injection.dart';
 
 part 'members_state.dart';

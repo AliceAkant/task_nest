@@ -15,7 +15,7 @@ import 'package:task_nest/presentation/enum/app_svg.dart';
 import 'package:task_nest/presentation/enum/date_filter_mode.dart';
 import 'package:task_nest/presentation/enum/schedule_view_mode.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
-import 'package:task_nest/presentation/extensions/date_time_extension.dart';
+import 'package:task_nest/core/extensions/date_time_extension.dart';
 import 'package:task_nest/presentation/helpers/app_bar_creator.dart';
 import 'package:task_nest/presentation/helpers/bottom_sheet_helper.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
@@ -261,6 +261,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
             child: _eventsGroup(
               context,
+              date: _selectedWeekDay,
               events: state.filteredEvents[_selectedWeekDay] ?? [],
               onEdit: (ev) => _editEvent(context, ev),
             ),
@@ -392,6 +393,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 const SizedBox(height: AppSizes.spacing4),
                 _eventsGroup(
                   context,
+                  date: state.selectedDate!,
                   events: state.filteredEvents[state.selectedDate] ?? [],
                   onEdit: (ev) => _editEvent(context, ev),
                 ),
@@ -435,6 +437,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             const SizedBox(height: AppSizes.spacing4),
             _eventsGroup(
               context,
+              date: entry.key,
               events: entry.value,
               onEdit: (ev) => _editEvent(context, ev),
             ),
@@ -459,17 +462,18 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   Widget _eventsGroup(
     BuildContext context, {
+    required DateTime date,
     required List<Event> events,
     required Function(Event) onEdit,
   }) {
     if (events.isEmpty) {
-      return _emptyDay(context);
+      return _emptyDay(context, date);
     }
 
     final localeKey = context.locale.toString();
-    events.sortBy((ev) => ev.dateTime);
+    final sorted = [...events]..sort((a, b) => a.dateTime.compareTo(b.dateTime));
 
-    final grouped = groupBy(events, (ev) => ev.dateTime.toTimeFormat(localeKey));
+    final grouped = groupBy(sorted, (ev) => ev.dateTime.toTimeFormat(localeKey));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -507,7 +511,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  Widget _emptyDay(BuildContext context) {
+  static const _emptyDayVariants = 8;
+
+  Widget _emptyDay(BuildContext context, DateTime date) {
+    final dayOnly = date.dateOnly;
+    final seed = dayOnly.year * 10000 + dayOnly.month * 100 + dayOnly.day;
+    final titleIdx = (seed * 7) % _emptyDayVariants;
+    final msgIdx = (seed * 13 + 5) % _emptyDayVariants;
+
     return Padding(
       padding: const EdgeInsets.only(
         top: AppSizes.spacing4,
@@ -518,7 +529,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         children: [
           const SizedBox(height: AppSizes.spacing24),
           BaseText(
-            LocaleKeys.empty_day_events_title,
+            'empty_day_title_$titleIdx',
             fontWeight: TypographyConst.wSemiBold,
             align: TextAlign.center,
             maxLines: 2,
@@ -526,7 +537,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ),
           const SizedBox(height: AppSizes.spacing2),
           BaseText(
-            LocaleKeys.empty_day_events_message,
+            'empty_day_message_$msgIdx',
             fontSize: TypographyConst.labelMedium,
             maxLines: 2,
             align: TextAlign.center,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:task_nest/domain/enums/avatar.dart';
 import 'package:task_nest/domain/enums/member_theme.dart';
+import 'package:task_nest/presentation/extensions/avatar_extension.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
 import 'package:task_nest/presentation/helpers/assets_helper.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';

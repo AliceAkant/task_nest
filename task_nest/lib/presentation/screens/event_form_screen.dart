@@ -56,13 +56,21 @@ class EventFormScreen extends StatefulWidget {
   State<EventFormScreen> createState() => _EventFormScreenState();
 }
 
-class _EventFormScreenState extends State<EventFormScreen> {
+class _EventFormScreenState extends State<EventFormScreen>
+    with WidgetsBindingObserver {
   late final TextEditingController _titleController;
   late final TextEditingController _noteController;
+  late final EventFormCubit _cubit;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _cubit = EventFormCubit(
+      widget.mode,
+      widget.initialEvent,
+      widget.initialDate,
+    );
     _titleController = TextEditingController(
       text: widget.initialEvent?.title ?? '',
     );
@@ -73,9 +81,18 @@ class _EventFormScreenState extends State<EventFormScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _cubit.close();
     _titleController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _cubit.refreshPermission();
+    }
   }
 
   Future _deleteEvent(BuildContext context) async {
@@ -98,12 +115,8 @@ class _EventFormScreenState extends State<EventFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => EventFormCubit(
-        widget.mode,
-        widget.initialEvent,
-        widget.initialDate,
-      ),
+    return BlocProvider.value(
+      value: _cubit,
       child: BlocConsumer<EventFormCubit, EventFormState>(
         listenWhen: (previous, next) =>
             (previous.completed != true && next.completed == true) ||
@@ -291,9 +304,11 @@ class _EventFormScreenState extends State<EventFormScreen> {
       child: ReminderDropdown(
         selectedReminders: state.reminders,
         isRussian: isRu,
+        osPermissionGranted: state.osPermissionGranted,
         noReminderKey: LocaleKeys.no_reminder,
         onToggled: cubit.reminderToggled,
         onNoReminderSelected: cubit.clearReminders,
+        onLockedTap: cubit.openNotificationSettings,
       ),
     );
   }
@@ -326,7 +341,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
         IgnorePointer(
           ignoring: !hasMembers && isTrue,
           child: Switcher(
-            initialValue: isTrue,
+            value: isTrue,
             onChanged: (value) => onChanged(value),
           ),
         ),

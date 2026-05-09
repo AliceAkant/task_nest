@@ -7,7 +7,7 @@ import 'package:task_nest/domain/enums/member_theme.dart';
 import 'package:task_nest/presentation/blocs/events_count/events_count_cubit.dart';
 import 'package:task_nest/presentation/enum/member_filter_mode.dart';
 import 'package:task_nest/presentation/extensions/build_context_extension.dart';
-import 'package:task_nest/presentation/extensions/date_time_extension.dart';
+import 'package:task_nest/core/extensions/date_time_extension.dart';
 import 'package:task_nest/presentation/extensions/string_extension.dart';
 import 'package:task_nest/presentation/theme/app_sizes.dart';
 import 'package:task_nest/presentation/theme/typography.dart';
@@ -63,7 +63,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   void initState() {
     super.initState();
     selectedMember = widget.initialMember;
-    selectedDate = widget.initialDate;
+    selectedDate = widget.initialDate?.dateOnly;
     mFilterMode = widget.memberFilterMode;
   }
 
@@ -178,8 +178,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           RoundedButton(
             textKey: LocaleKeys.apply,
             isEnabled:
-                selectedMember != widget.initialMember ||
-                selectedDate != widget.initialDate ||
+                selectedMember?.id != widget.initialMember?.id ||
+                selectedDate?.dateOnly != widget.initialDate?.dateOnly ||
                 mFilterMode != widget.memberFilterMode,
             onTap: () => _onApplyTap(context),
           ),
@@ -270,7 +270,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     : context.colors.labelSecondary,
               ),
             ),
-            Switcher(initialValue: isSelected, onChanged: _toggleOnlyMine),
+            Switcher(value: isSelected, onChanged: _toggleOnlyMine),
           ],
         ),
       ),

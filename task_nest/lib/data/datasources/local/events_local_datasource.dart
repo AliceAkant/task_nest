@@ -5,7 +5,7 @@ import 'package:task_nest/data/datasources/datasource_helper.dart';
 import 'package:task_nest/data/dto_models/local/event_drift_dto.dart';
 import 'package:task_nest/data/dto_models/local/member_drift_dto.dart';
 import 'package:task_nest/infrastructure/storage/drift/app_database.dart';
-import 'package:task_nest/presentation/extensions/date_time_extension.dart';
+import 'package:task_nest/core/extensions/date_time_extension.dart';
 
 class EventsLocalDataSource {
   final AppDatabase db;
@@ -33,35 +33,6 @@ class EventsLocalDataSource {
         return result;
       },
       errorTitle: "Failed to get all events",
-    );
-  }
-
-  Future<Either<Failure, List<EventDriftDto>>> getEventsByDate(
-    DateTime date,
-  ) async {
-    final startOfDay = date.dateOnly;
-    final endOfDay = date.endOfDay;
-
-    return DataSourceHelper.executeSafe(
-      action: () async {
-        final query = db.select(db.events).join([_memberJoin]);
-        query.where(
-          db.events.timeDate.isBiggerOrEqualValue(startOfDay) &
-              db.events.timeDate.isSmallerOrEqualValue(endOfDay),
-        );
-
-        final rows = await query.get();
-
-        final result = rows.map((row) {
-          final event = row.readTable(db.events);
-          final member = row.readTableOrNull(db.members);
-
-          return _formatEventDTO(event, member);
-        }).toList();
-
-        return result;
-      },
-      errorTitle: "Failed to get events by date ${startOfDay.toString()}",
     );
   }
 
@@ -93,44 +64,17 @@ class EventsLocalDataSource {
     );
   }
 
-  Future<Either<Failure, List<EventDriftDto>>> getEventsByMemberId(
-    int? memberId,
-  ) async {
-    return DataSourceHelper.executeSafe(
-      action: () async {
-        final query = db.select(db.events).join([_memberJoin]);
-
-        if (memberId == null) {
-          query.where(db.events.memberId.isNull());
-        } else {
-          query.where(db.events.memberId.equals(memberId));
-        }
-
-        final rows = await query.get();
-
-        final result = rows.map((row) {
-          final event = row.readTable(db.events);
-          final member = row.readTableOrNull(db.members);
-
-          return _formatEventDTO(event, member);
-        }).toList();
-
-        return result;
-      },
-      errorTitle: "Failed to get events by member $memberId",
-    );
-  }
-
   Future<Either<Failure, Map<DateTime, int>>> getEventsCount(
     DateTime start,
     int monthsCount,
   ) async {
     final startDate = start.dateOnly;
+    final safeMonths = monthsCount < 0 ? 0 : monthsCount;
     final lastDate = DateTime(
       startDate.year,
-      startDate.month + monthsCount,
+      startDate.month + safeMonths,
       startDate.day,
-    );
+    ).endOfDay;
 
     return DataSourceHelper.executeSafe(
       action: () async {
