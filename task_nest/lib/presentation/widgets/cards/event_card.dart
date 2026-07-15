@@ -78,16 +78,22 @@ class EventCard extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.only(top: AppSizes.spacing2),
-          child: BaseText(
-            event.notes != null && event.notes!.isNotEmpty
-                ? event.notes!
-                : 'Без заметок',
-            color: color,
-            fontSize: TypographyConst.labelMedium,
-            height: 1.2,
-            maxLines: 2,
-            localized: false,
-          ),
+          child: (event.notes != null && event.notes!.isNotEmpty)
+              ? BaseText(
+                  event.notes!,
+                  color: color,
+                  fontSize: TypographyConst.labelMedium,
+                  height: 1.2,
+                  maxLines: 2,
+                  localized: false,
+                )
+              : BaseText(
+                  'no_notes',
+                  color: color,
+                  fontSize: TypographyConst.labelMedium,
+                  height: 1.2,
+                  maxLines: 2,
+                ),
         ),
         if (event.member != null)
           Padding(

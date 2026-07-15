@@ -230,18 +230,27 @@ class _EventFormScreenState extends State<EventFormScreen>
                       ),
                     ),
                     const SizedBox(height: AppSizes.spacing16),
-
-                    // BUTTONS
-                    const SizedBox(height: AppSizes.spacing24),
-                    FormButtonsRow(
-                      mode: widget.mode,
-                      addTextKey: LocaleKeys.add_event,
-                      saveTextKey: LocaleKeys.save,
-                      onSave: () => cubit.save(),
-                      onDelete: () => _deleteEvent(context),
-                      isSaving: state.isSaving,
-                    ),
                   ],
+                ),
+              ),
+            ),
+            bottomNavigationBar: Container(
+              color: context.colors.background,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.pageHGap,
+                    vertical: AppSizes.spacing8,
+                  ),
+                  child: FormButtonsRow(
+                    mode: widget.mode,
+                    addTextKey: LocaleKeys.add_event,
+                    saveTextKey: LocaleKeys.save,
+                    onSave: () => cubit.save(),
+                    onDelete: () => _deleteEvent(context),
+                    isSaving: state.isSaving,
+                  ),
                 ),
               ),
             ),

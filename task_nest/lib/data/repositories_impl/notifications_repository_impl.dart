@@ -33,16 +33,18 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   Future<void> initialize() async {
     tz.initializeTimeZones();
     final localTimezone = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(localTimezone));
+    tz.setLocalLocation(tz.getLocation(localTimezone.identifier));
 
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit = AndroidInitializationSettings('@drawable/ic_notification');
     const iosInit = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
     );
-    const initSettings =
-        InitializationSettings(android: androidInit, iOS: iosInit);
+    const initSettings = InitializationSettings(
+      android: androidInit,
+      iOS: iosInit,
+    );
 
     await _plugin.initialize(initSettings);
 
@@ -65,8 +67,10 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   @override
   Future<bool> checkPermissions() async {
     if (Platform.isIOS) {
-      final ios = _plugin.resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>();
+      final ios = _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
       final settings = await ios?.checkPermissions();
       if (settings == null) return false;
       return settings.isEnabled;
@@ -191,8 +195,10 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   /// On Android use permission_handler.
   Future<bool> _platformRequestPermission() async {
     if (Platform.isIOS) {
-      final ios = _plugin.resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>();
+      final ios = _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
       return await ios?.requestPermissions(
             alert: true,
             badge: true,
@@ -206,8 +212,10 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
 
   Future<void> _ensureExactAlarmsPermissionAndroid() async {
     if (!Platform.isAndroid) return;
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await android?.requestExactAlarmsPermission();
   }
 
@@ -229,6 +237,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
           _channelId,
           _channelName,
           channelDescription: _channelDescription,
+          icon: '@drawable/ic_notification',
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,

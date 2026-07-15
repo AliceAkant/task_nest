@@ -577,29 +577,26 @@ class _AddButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!isVisible) return const SizedBox();
-    return Align(
-      alignment: Alignment.bottomRight,
-      child: GestureDetector(
-        onTap: () => onTap.call(),
-        child: Container(
-          width: size,
-          height: size,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: context.colors.purple,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(120),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Text(
-            '+',
-            style: TextStyle(fontSize: 30, color: context.colors.background),
-          ),
+    return GestureDetector(
+      onTap: () => onTap.call(),
+      child: Container(
+        width: size,
+        height: size,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: context.colors.purple,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(120),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Text(
+          '+',
+          style: TextStyle(fontSize: 30, color: context.colors.background),
         ),
       ),
     );

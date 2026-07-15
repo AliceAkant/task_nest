@@ -156,18 +156,28 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                         state.name,
                       ),
                     ),
-                    const SizedBox(height: AppSizes.spacing24),
-
-                    // BUTTONS
-                    FormButtonsRow(
-                      mode: widget.mode,
-                      addTextKey: LocaleKeys.add_member,
-                      saveTextKey: LocaleKeys.save,
-                      onSave: () => cubit.save(),
-                      onDelete: () => _deleteMember(context),
-                      isSaving: state.isSaving,
-                    ),
+                    const SizedBox(height: AppSizes.spacing16),
                   ],
+                ),
+              ),
+            ),
+            bottomNavigationBar: Container(
+              color: context.colors.background,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.pageHGap,
+                    vertical: AppSizes.spacing8,
+                  ),
+                  child: FormButtonsRow(
+                    mode: widget.mode,
+                    addTextKey: LocaleKeys.add_member,
+                    saveTextKey: LocaleKeys.save,
+                    onSave: () => cubit.save(),
+                    onDelete: () => _deleteMember(context),
+                    isSaving: state.isSaving,
+                  ),
                 ),
               ),
             ),

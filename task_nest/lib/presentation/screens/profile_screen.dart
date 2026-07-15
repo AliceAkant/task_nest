@@ -118,18 +118,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: AppSizes.spacing24),
-
-                    // BUTTONS
-                    RoundedButton(
-                      textKey: LocaleKeys.save,
-                      onTap: () {
-                        if (!state.isSaving) {
-                          cubit.save();
-                        }
-                      },
-                    ),
+                    const SizedBox(height: AppSizes.spacing16),
                   ],
+                ),
+              ),
+            ),
+            bottomNavigationBar: Container(
+              color: context.colors.background,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.pageHGap,
+                    vertical: AppSizes.spacing8,
+                  ),
+                  child: RoundedButton(
+                    textKey: LocaleKeys.save,
+                    onTap: () {
+                      if (!state.isSaving) {
+                        cubit.save();
+                      }
+                    },
+                  ),
                 ),
               ),
             ),
