@@ -21,29 +21,35 @@ TaskNest is a Flutter-based scheduling and event management app for organizing e
 
 TaskNest shows your schedule in three switchable views:
 
-| List | Week | Calendar |
-|------|------|----------|
-| ![List](screenshots/schedule_list.jpeg) | ![Week](screenshots/schedule_week.jpeg) | ![Calendar](screenshots/schedule_calendar.jpeg) |
+<p align="center">
+  <img src="screenshots/schedule_list.jpeg" width="200" alt="List view" />
+  <img src="screenshots/schedule_week.jpeg" width="200" alt="Week view" />
+  <img src="screenshots/schedule_calendar.jpeg" width="200" alt="Calendar view" />
+</p>
 
 ### Creating & editing events
 
 Set reminders, and get warned about overlaps with other members' events:
 
-| Add event & reminders | Edit event & overlap detection |
-|-----------------------|--------------------------------|
-| ![Add event](screenshots/add_event_reminder.jpeg) | ![Edit event](screenshots/edit_event.jpeg) |
+<p align="center">
+  <img src="screenshots/add_event_reminder.jpeg" width="200" alt="Add event & reminders" />
+  <img src="screenshots/edit_event.jpeg" width="200" alt="Edit event & overlap detection" />
+</p>
 
 ### Members & filters
 
-| Add member | Schedule filters |
-|------------|------------------|
-| ![Add member](screenshots/add_member.jpeg) | ![Filters](screenshots/filters.jpeg) |
+<p align="center">
+  <img src="screenshots/add_member.jpeg" width="200" alt="Add member" />
+  <img src="screenshots/filters.jpeg" width="200" alt="Schedule filters" />
+</p>
 
 ### Settings & more
 
-| Settings (Light) | Settings (Dark) | Free day |
-|------------------|-----------------|----------|
-| ![Settings light](screenshots/settings_light.jpeg) | ![Settings dark](screenshots/settings_dark.jpeg) | ![Empty](screenshots/empty_week.jpeg) |
+<p align="center">
+  <img src="screenshots/settings_light.jpeg" width="200" alt="Settings (Light)" />
+  <img src="screenshots/settings_dark.jpeg" width="200" alt="Settings (Dark)" />
+  <img src="screenshots/empty_week.jpeg" width="200" alt="Free day" />
+</p>
 
 ## ✨ Features
 
